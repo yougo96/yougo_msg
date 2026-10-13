@@ -13,6 +13,7 @@
 //     page       fonction autonome exécutée dans la page : renvoie { count, dot }, ou null si elle ne sait pas
 //                (page pas encore prête). Elle passe avant le titre.
 //     badge      true : la page publie son total via navigator.setAppBadge(). Il passe avant tout le reste.
+//     quietDot   true : la pastille sans nombre ne déclenche ni « Nouveau message » ni clignotement.
 //   googleSignIn true : propose le « mode compatibilité » si la connexion Google est refusée.
 //   noPush       true : masque l'API Push pour que la page notifie elle-même (Electron n'a pas de Push).
 //   css          CSS injecté dans la page.
@@ -132,6 +133,8 @@ module.exports = [
     unread: {
       // « (3) Discord | … » : mentions et messages privés. « • Discord | … » : non-lus sans mention.
       title: [{ match: /^\((\d+)\+?\)/ }, { match: /^\s*•/, dot: true }],
+      // Seuls les mentions et les messages privés méritent une notification.
+      quietDot: true,
     },
   },
 

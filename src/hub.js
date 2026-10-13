@@ -386,7 +386,7 @@ class Hub {
     if (previous.count !== null && next.count !== null && next.count !== previous.count) {
       this.log('info', `${id} : ${previous.count} → ${next.count} non lus (${next.source})`);
     }
-    const rose = previous.count !== null && ((next.count ?? 0) > (previous.count ?? 0) || (next.dot && !previous.dot && !previous.count));
+    const rose = previous.count !== null && ((next.count ?? 0) > (previous.count ?? 0) || (next.dot && !previous.dot && !previous.count && !account.service.unread?.quietDot));
     if (rose && rt.loadedAt && Date.now() - rt.loadedAt > SETTLE_DELAY) {
       this.notifier.onUnreadRise(account, next);
       if (!account.muted && !this.dndActive() && this.win?.isVisible() && !this.win.isFocused()) this.win.flashFrame(true);
