@@ -8,7 +8,11 @@ const views = require('./views');
 const autostart = require('./autostart');
 const { prompt } = require('./dialogs');
 
-const SIDEBAR_WIDTH = 72;
+// Barre latérale en liste ; en dessous de COMPACT_BELOW px de large, la fenêtre la replie en colonne d'icônes :
+// la liste ne s'affiche que si la page garde au moins ~950 px.
+const SIDEBAR_WIDTH = 248;
+const SIDEBAR_COMPACT_WIDTH = 72;
+const COMPACT_BELOW = 1200;
 const ASSETS = path.join(__dirname, '..', 'assets');
 const SIDEBAR_HTML = path.join(__dirname, 'ui', 'sidebar', 'index.html');
 const SIDEBAR_PRELOAD = path.join(__dirname, 'preload', 'sidebar.js');
@@ -83,7 +87,7 @@ class Hub {
       minHeight: 480,
       title: 'HP Message',
       icon: APP_ICON,
-      backgroundColor: '#15171c',
+      backgroundColor: '#13151a',
       show: false,
       webPreferences: { preload: SIDEBAR_PRELOAD, sandbox: true, contextIsolation: true, spellcheck: false },
     });
@@ -162,9 +166,19 @@ class Hub {
     const win = this.win;
     if (!win || win.isDestroyed()) return;
     const [width, height] = win.getContentSize();
-    const normal = { x: SIDEBAR_WIDTH, y: 0, width: Math.max(0, width - SIDEBAR_WIDTH), height };
+    const sidebar = this.sidebarWidth();
+    const normal = { x: sidebar, y: 0, width: Math.max(0, width - sidebar), height };
     const full = { x: 0, y: 0, width, height };
     for (const [id, view] of this.views) view.setBounds(id === this.fullscreenId ? full : normal);
+    if (sidebar !== this.shownSidebarWidth) {
+      this.shownSidebarWidth = sidebar;
+      this.pushState();
+    }
+  }
+
+  sidebarWidth() {
+    const width = this.win && !this.win.isDestroyed() ? this.win.getContentSize()[0] : 0;
+    return width && width < COMPACT_BELOW ? SIDEBAR_COMPACT_WIDTH : SIDEBAR_WIDTH;
   }
 
   setFullscreenAccount(id) {
@@ -334,7 +348,13 @@ class Hub {
     if (!this.prefs.dnd || this.prefs.dndUntil === null) return;
     // Plafonné : les minuteries très longues débordent, et la mise en veille du PC les décale.
     const delay = Math.min(Math.max(0, this.prefs.dndUntil - Date.now()), 60e3);
-    this.dndTimer = setTimeout(() => (this.dndActive() ? this.scheduleDndEnd() : this.setDnd('off')), delay);
+    this.dndTimer = setTimeout(() => {
+      if (!this.dndActive()) return this.setDnd('off');
+      // Le libellé suit l'heure (« demain 08:00 » devient « 08:00 » après minuit).
+      this.pushState();
+      this.tray?.update();
+      this.scheduleDndEnd();
+    }, delay);
   }
 
   dndLabel() {
@@ -447,7 +467,9 @@ class Hub {
     const summary = this.summary();
     const key = this.badgeKey(summary);
     return {
-      sidebarWidth: SIDEBAR_WIDTH,
+      sidebarWidth: this.sidebarWidth(),
+      compact: this.sidebarWidth() === SIDEBAR_COMPACT_WIDTH,
+      summary,
       platform: process.platform,
       activeId: this.prefs.activeId,
       dnd: { on: this.dndActive(), label: this.dndLabel() },

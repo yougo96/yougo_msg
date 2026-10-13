@@ -128,7 +128,7 @@ function openWindow(hub) {
     width: 980,
     height: 640,
     title: 'HP Message · Diagnostic',
-    backgroundColor: '#15171c',
+    backgroundColor: '#13151a',
     autoHideMenuBar: true,
     webPreferences: { preload: path.join(__dirname, 'preload', 'tool.js'), sandbox: true, contextIsolation: true },
   });

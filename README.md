@@ -23,10 +23,10 @@ Au premier lancement, chaque messagerie demande de se connecter (QR code pour Wh
 
 ## Au quotidien
 
-- **Barre latérale** : un clic ouvre une messagerie, `Ctrl+1` … `Ctrl+9` aussi. On réordonne en glissant les icônes.
-- **Pastilles** : un nombre (non-lus), un point (nouveaux messages sans nombre, ex. Discord sans mention), ou un **!** orange (connexion requise, hors ligne, page plantée). Survoler une icône donne le détail.
-- **Clic droit sur une icône** : couper les notifications de ce compte, recharger, revenir à l'accueil, renommer, ajouter un autre compte du même service, réparer (vider le cache), retirer.
-- **Cloche** : *Ne pas déranger*. Clic droit pour une durée (1 h, jusqu'à demain 8 h).
+- **Barre latérale** : la liste des comptes, avec en tête le total des non-lus et les comptes à vérifier. Un clic ouvre une messagerie, `Ctrl+1` … `Ctrl+9` aussi. On réordonne en glissant les comptes. Quand la fenêtre fait moins de 1200 px de large, la liste se replie en colonne d'icônes pour laisser la place à la page.
+- **Indicateurs** : à droite de chaque compte, le nombre de non-lus, un point (nouveaux messages sans nombre, ex. Discord sans mention) ou un **!** orange (connexion requise, hors ligne, page plantée), expliqué sous le nom. En colonne d'icônes, ils deviennent des pastilles sur l'icône, et le survol donne le détail.
+- **Clic droit sur un compte** : couper les notifications de ce compte, recharger, revenir à l'accueil, renommer, ajouter un autre compte du même service, réparer (vider le cache), retirer.
+- **Ne pas déranger** (en bas de la barre) : un clic l'active ou le coupe, clic droit pour une durée (1 h, jusqu'à demain 8 h).
 - **⋯** : ajouter une messagerie (dont Telegram et LinkedIn), lancer au démarrage, diagnostic, journaux, quitter.
 - **Fermer la fenêtre ne quitte pas** : HP Message reste près de l'horloge pour continuer à recevoir les messages. Pour quitter : clic droit sur l'icône près de l'horloge, ou menu ⋯.
 - **Démarrage avec le PC** : activé d'office dans la version installée (désactivable dans ⋯). L'app démarre alors directement dans la zone de notification.
@@ -104,7 +104,7 @@ src/
   accounts.js, settings.js   comptes et réglages (écriture atomique, reprise du POC)
   tray.js, autostart.js, linux.js, context-menu.js, diagnostics.js, dialogs.js, log.js
   preload/           ponts : barre latérale, petites fenêtres, et service.js injecté dans les messageries
-  ui/                barre latérale, Diagnostic, Renommer
+  ui/                barre latérale, Diagnostic, Renommer ; fonts/ : polices de la DA de pradierh.fr (Unbounded, Lexend, licence OFL)
 test/                tests (node:test) et test de bout en bout (smoke)
 ```
 

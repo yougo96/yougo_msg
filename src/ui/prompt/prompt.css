@@ -1,34 +1,30 @@
-:root {
-  color-scheme: dark;
-}
-
 body {
   margin: 0;
   padding: 18px 20px;
-  background: #1d2027;
-  color: #e6e8ec;
-  font: 14px 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font: 14px var(--body);
 }
 
 label {
   display: block;
   margin-bottom: 8px;
-  color: #b6bcc8;
+  color: var(--text-2);
 }
 
 input {
   width: 100%;
   box-sizing: border-box;
   padding: 8px 10px;
-  border: 1px solid #3a3f4a;
-  border-radius: 8px;
-  background: #15171c;
+  border: 1px solid var(--outline-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
   color: inherit;
   font: inherit;
 }
 
 input:focus {
-  border-color: #8b5cf6;
+  border-color: var(--accent);
   outline: none;
 }
 
@@ -42,13 +38,27 @@ input:focus {
 button {
   padding: 7px 14px;
   border: 0;
-  border-radius: 8px;
-  background: #2f3440;
+  border-radius: var(--radius);
+  outline: 1px solid var(--outline-strong);
+  background: transparent;
   color: inherit;
   font: inherit;
   cursor: pointer;
 }
 
+button:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
 button.primary {
-  background: #7c3aed;
+  outline-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 500;
+}
+
+/* Après button.primary, dont le contour a déjà la couleur d'accent. */
+button:focus-visible {
+  outline: 2px solid var(--accent-light);
+  outline-offset: 2px;
 }

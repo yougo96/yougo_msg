@@ -192,6 +192,18 @@ async function run() {
   });
 
   if (OUT) fs.writeFileSync(path.join(OUT, 'sidebar.png'), (await hub.win.webContents.capturePage()).toPNG());
+
+  // Fenêtre étroite : la liste se replie en colonne d'icônes, et les pages suivent.
+  const listX = hub.views.get(ids[3]).getBounds().x;
+  hub.win.unmaximize();
+  await sleep(300);
+  hub.win.setContentSize(900, 700);
+  const compact = await waitFor(
+    async () => hub.views.get(ids[3]).getBounds().x < listX && (await hub.win.webContents.executeJavaScript('document.body.classList.contains("compact")')),
+    3000,
+  );
+  check('barre en liste, repliée quand la fenêtre est étroite', listX > 200 && compact, { liste: listX, repliee: hub.views.get(ids[3]).getBounds().x });
+  if (OUT) fs.writeFileSync(path.join(OUT, 'sidebar-compact.png'), (await hub.win.webContents.capturePage()).toPNG());
   check('réglages enregistrés', fs.existsSync(path.join(app.getPath('userData'), 'settings.json')));
   check('journal écrit', fs.existsSync(path.join(app.getPath('userData'), 'logs', 'hp-message.log')));
 

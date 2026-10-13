@@ -214,7 +214,7 @@ function openWindow(hub, id, getService, { url }) {
       show: decision === 'window', // about:blank : on attend de savoir ce que la page y charge
       autoHideMenuBar: true,
       icon: APP_ICON,
-      backgroundColor: '#15171c',
+      backgroundColor: '#13151a',
       webPreferences: { sandbox: true, contextIsolation: true, focusOnNavigation: true, safeDialogs: true },
     },
   };

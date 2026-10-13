@@ -4,10 +4,15 @@
   <meta charset="utf-8">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:">
   <title>HP Message</title>
+  <link rel="stylesheet" href="../fonts/fonts.css">
   <link rel="stylesheet" href="sidebar.css">
 </head>
 <body>
   <aside id="sidebar">
+    <header id="brand">
+      <div id="wordmark"><span class="full">HP MESSAGE</span><span class="short">HP</span></div>
+      <p id="summary"></p>
+    </header>
     <nav id="accounts" aria-label="Messageries"></nav>
     <div id="tools">
       <button id="dnd" class="tool" aria-pressed="false" aria-label="Ne pas déranger">
@@ -15,6 +20,7 @@
           <path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4z M10 21a2 2 0 0 0 4 0" />
           <line class="slash" x1="4" y1="3" x2="20" y2="21" />
         </svg>
+        <span class="tool-text"><span class="tool-label">Ne pas déranger</span><span id="dnd-state" class="tool-state"></span></span>
       </button>
       <button id="menu" class="tool" aria-label="Menu" title="Ajouter une messagerie, réglages, diagnostic, quitter">
         <svg viewBox="0 0 24 24" aria-hidden="true">

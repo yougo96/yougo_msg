@@ -20,7 +20,7 @@ function prompt(parent, { title, label, value = '', placeholder = '' }) {
       maximizable: false,
       title,
       show: false,
-      backgroundColor: '#1d2027',
+      backgroundColor: '#13151a',
       webPreferences: { preload: path.join(__dirname, 'preload', 'tool.js'), sandbox: true, contextIsolation: true },
     });
     win.removeMenu();

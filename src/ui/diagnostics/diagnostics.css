@@ -1,12 +1,8 @@
-:root {
-  color-scheme: dark;
-}
-
 body {
   margin: 0;
-  background: #15171c;
-  color: #e6e8ec;
-  font: 13px 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font: 13px var(--body);
 }
 
 header {
@@ -19,22 +15,26 @@ header {
 
 h1 {
   margin: 0 0 4px;
-  font-size: 18px;
+  font-family: var(--display);
+  font-size: 17px;
+  font-weight: 500;
 }
 
 h2 {
   margin: 20px 0 6px;
-  font-size: 14px;
+  font-family: var(--display);
+  font-size: 13px;
+  font-weight: 500;
 }
 
 p {
   margin: 0;
-  color: #9aa1ad;
+  color: var(--text-2);
 }
 
 #warning {
   margin-top: 6px;
-  color: #ffb36b;
+  color: var(--alert);
 }
 
 .actions {
@@ -45,11 +45,21 @@ p {
 button {
   padding: 6px 12px;
   border: 0;
-  border-radius: 8px;
-  background: #2f3440;
+  border-radius: var(--radius);
+  outline: 1px solid var(--outline-strong);
+  background: transparent;
   color: inherit;
   font: inherit;
   cursor: pointer;
+}
+
+button:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 main {
@@ -64,21 +74,21 @@ table {
 th,
 td {
   padding: 7px 8px;
-  border-bottom: 1px solid #23262d;
+  border-bottom: 1px solid var(--line);
   text-align: left;
   vertical-align: top;
 }
 
 th {
-  color: #9aa1ad;
-  font-weight: 600;
+  color: var(--text-2);
+  font-weight: 500;
 }
 
 td small {
   display: block;
   max-width: 280px;
   overflow: hidden;
-  color: #7d8491;
+  color: var(--text-2);
   text-overflow: ellipsis;
   white-space: nowrap;
   user-select: text;
@@ -89,7 +99,7 @@ td small {
 }
 
 .warn {
-  color: #ffb36b;
+  color: var(--alert);
 }
 
 .ok {

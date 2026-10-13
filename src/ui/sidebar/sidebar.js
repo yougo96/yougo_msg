@@ -1,11 +1,13 @@
 const nav = document.getElementById('accounts');
+const summaryText = document.getElementById('summary');
 const dndButton = document.getElementById('dnd');
+const dndState = document.getElementById('dnd-state');
 const menuButton = document.getElementById('menu');
 const panel = document.getElementById('panel');
 const panelTitle = document.getElementById('panel-title');
 const panelText = document.getElementById('panel-text');
 const panelAction = document.getElementById('panel-action');
-const buttons = new Map(); // id -> { button, badge, number }
+const rows = new Map(); // id -> éléments de la ligne
 let renderedIds = '';
 let state = null;
 let dragged = null;
@@ -20,9 +22,12 @@ const STATUS_TEXT = {
 };
 const ALERTS = new Set(['login', 'offline', 'crashed', 'unresponsive']);
 
-function createButton(account) {
-  const button = document.createElement('button');
-  button.className = 'account';
+const element = (tag, className) => Object.assign(document.createElement(tag), { className });
+const plural = (count, word) => `${count} ${word}${count > 1 ? 's' : ''}`;
+
+// Une ligne : icône (avec pastille et numéro, visibles seulement en colonne d'icônes), nom et détail, non-lus à droite.
+function createRow(account) {
+  const button = element('button', 'account');
   button.draggable = true;
   button.addEventListener('click', () => window.hub.select(account.id));
   button.addEventListener('contextmenu', (event) => {
@@ -30,30 +35,32 @@ function createButton(account) {
     window.hub.accountMenu(account.id);
   });
 
+  const tile = element('span', 'tile');
   const icon = document.createElement('img');
   icon.src = `icons/${account.serviceId}.png`;
   icon.alt = '';
   icon.draggable = false;
   // Pas d'icône : on retombe sur l'initiale aux couleurs du service.
   icon.addEventListener('error', () => {
-    const fallback = document.createElement('span');
-    fallback.className = 'fallback';
+    const fallback = element('span', 'fallback');
     fallback.textContent = account.serviceName[0];
     icon.replaceWith(fallback);
   });
+  const badge = element('span', 'badge');
+  const number = element('span', 'number');
+  tile.append(icon, badge, number);
 
-  const badge = document.createElement('span');
-  badge.className = 'badge';
-  badge.hidden = true;
-  const number = document.createElement('span');
-  number.className = 'number';
-  number.hidden = true;
-  button.append(icon, badge, number);
+  const text = element('span', 'text');
+  const name = element('span', 'name');
+  const detail = element('span', 'detail');
+  text.append(name, detail);
+  const trail = element('span', 'trail');
+  button.append(tile, text, trail);
   setupDrag(button, account.id);
-  return { button, badge, number };
+  return { button, badge, number, name, detail, trail };
 }
 
-// Réordonner en glissant une icône sur une autre.
+// Réordonner en glissant un compte sur un autre.
 function setupDrag(button, id) {
   const clear = () => button.classList.remove('drop-before', 'drop-after');
   const after = (event) => event.clientY - button.getBoundingClientRect().top > button.clientHeight / 2;
@@ -80,58 +87,92 @@ function setupDrag(button, id) {
   });
 }
 
-function badgeContent(account) {
-  if (ALERTS.has(account.status)) return { text: '!', className: 'badge alert' };
+// Ce qu'on signale pour un compte : alerte, nombre de non-lus, ou pastille.
+function indicator(account) {
+  if (ALERTS.has(account.status)) return { kind: 'alert', text: '!' };
   const { count, dot } = account.unread;
-  if (count) return { text: count > 99 ? '99+' : String(count), className: 'badge' };
-  if (dot) return { text: '', className: 'badge dot' };
+  if (count) return { kind: 'count', text: count > 99 ? '99+' : String(count) };
+  if (dot) return { kind: 'dot', text: '' };
   return null;
+}
+
+// Sous le nom : la messagerie quand le compte est renommé, puis son état.
+function detailText(account) {
+  const parts = [];
+  if (!account.name.startsWith(account.serviceName)) parts.push(account.serviceName);
+  if (STATUS_TEXT[account.status]) parts.push(STATUS_TEXT[account.status]);
+  else if (account.unread.dot && !account.unread.count) parts.push('Nouveaux messages');
+  if (account.muted) parts.push('Notifications coupées');
+  return parts.join(' · ');
+}
+
+function summaryLine() {
+  const { count, dot } = state.summary;
+  const alerts = state.accounts.filter((account) => ALERTS.has(account.status)).length;
+  const loading = state.accounts.some((account) => !account.muted && (account.status === 'waiting' || account.status === 'loading'));
+  return [
+    count ? plural(count, 'non lu') : dot ? 'Nouveaux messages' : loading ? 'Chargement…' : 'Rien de nouveau',
+    alerts ? `${plural(alerts, 'compte')} à vérifier` : '',
+  ]
+    .filter(Boolean)
+    .join(' · ');
 }
 
 function render(next) {
   state = next;
   document.documentElement.style.setProperty('--sidebar-width', `${state.sidebarWidth}px`);
+  document.body.classList.toggle('compact', state.compact);
+  summaryText.textContent = summaryLine();
 
   // Comptes ajoutés, retirés ou déplacés : on reconstruit la liste.
   const ids = state.accounts.map((account) => account.id).join();
   if (ids !== renderedIds) {
     renderedIds = ids;
-    const previous = new Map(buttons);
-    buttons.clear();
-    for (const account of state.accounts) buttons.set(account.id, previous.get(account.id) ?? createButton(account));
-    nav.replaceChildren(...[...buttons.values()].map(({ button }) => button));
+    const previous = new Map(rows);
+    rows.clear();
+    for (const account of state.accounts) rows.set(account.id, previous.get(account.id) ?? createRow(account));
+    nav.replaceChildren(...[...rows.values()].map(({ button }) => button));
   }
 
   state.accounts.forEach((account, index) => {
-    const { button, badge, number } = buttons.get(account.id);
+    const row = rows.get(account.id);
+    const shown = indicator(account);
+    const detail = detailText(account);
+    const unreadText = account.unread.count ? plural(account.unread.count, 'non lu') : account.unread.dot ? 'Nouveaux messages' : '';
     const shortcut = index < 9 ? `  (Ctrl+${index + 1})` : '';
-    button.title = [
+    row.button.title = [
       `${account.name}${shortcut}`,
       STATUS_TEXT[account.status],
-      account.unread.count ? `${account.unread.count} non lu${account.unread.count > 1 ? 's' : ''}` : account.unread.dot ? 'Nouveaux messages' : '',
+      unreadText,
       account.muted && 'Notifications coupées',
       'Clic droit : notifications, renommer, autre compte…',
     ]
       .filter(Boolean)
       .join('\n');
-    button.setAttribute('aria-label', account.name);
-    button.style.setProperty('--brand', account.color);
-    button.classList.toggle('active', account.id === state.activeId);
-    button.classList.toggle('loading', account.status === 'loading' || account.status === 'waiting');
-    button.classList.toggle('muted', account.muted);
-    const content = badgeContent(account);
-    badge.hidden = !content;
-    if (content) {
-      badge.className = content.className;
-      badge.textContent = content.text;
+    row.button.setAttribute('aria-label', [account.name, STATUS_TEXT[account.status], unreadText, account.muted && 'notifications coupées'].filter(Boolean).join(', '));
+    row.button.style.setProperty('--brand', account.color);
+    row.button.classList.toggle('active', account.id === state.activeId);
+    row.button.classList.toggle('loading', account.status === 'loading' || account.status === 'waiting');
+    row.button.classList.toggle('muted', account.muted);
+
+    row.name.textContent = account.name;
+    row.detail.textContent = detail;
+    row.detail.hidden = !detail;
+    for (const target of [row.trail, row.badge]) {
+      target.hidden = !shown;
+      target.classList.remove('alert', 'count', 'dot');
+      if (shown) target.classList.add(shown.kind);
+      target.textContent = shown?.text ?? '';
     }
-    number.hidden = !account.number;
-    number.textContent = account.number || '';
+    row.number.hidden = !account.number;
+    row.number.textContent = account.number || '';
   });
 
   dndButton.classList.toggle('on', state.dnd.on);
   dndButton.setAttribute('aria-pressed', String(state.dnd.on));
   dndButton.title = `Ne pas déranger : ${state.dnd.label.toLowerCase()}\nClic droit : choisir une durée`;
+  // Version courte du libellé : « Activé » se voit déjà à l'état du bouton.
+  dndState.textContent = state.dnd.label.replace(/^Activé j/, 'J');
 
   renderPanel();
   for (const key of state.badgeRequests) window.hub.badgeImages(key, window.badgeArt.images(key, state.platform));
