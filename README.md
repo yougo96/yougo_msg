@@ -8,7 +8,7 @@ Les versions web officielles sont affichées telles quelles, chacune avec sa pro
 
 **En venant de HP Message** (l'ancien nom de l'app, et celui du POC) : au premier lancement, Yougo Msg reprend son profil, donc ses connexions, ses comptes et ses réglages. La version installée remplace aussi son lancement au démarrage. Il faut d'abord quitter HP Message (clic droit sur son icône près de l'horloge → *Quitter*) : tant qu'il est ouvert, Yougo Msg le signale et s'arrête. Ensuite, désinstaller HP Message (Paramètres → Applications ; sous Linux, `sudo apt remove hp-message`).
 
-**Version installée** : `npm run dist`, puis double-clic sur `dist\Yougo-Msg-Setup-0.2.0.exe`. L'app n'est pas signée : à la première installation, Windows affiche « Windows a protégé votre ordinateur » → *Informations complémentaires* → *Exécuter quand même*.
+**Version installée** : `Yougo-Msg-Setup-<version>.exe`, à télécharger dans les [releases](https://github.com/yougo96/yougo_msg/releases) (ou `npm run dist`, puis `dist\Yougo-Msg-Setup-<version>.exe`). L'app n'est pas signée : à la première installation, Windows affiche « Windows a protégé votre ordinateur » → *Informations complémentaires* → *Exécuter quand même*. Elle se met ensuite à jour seule (voir [Mises à jour](#mises-à-jour)).
 
 **Version de développement** (Node.js 22.12 ou plus, 24 conseillé, cf. `.nvmrc`) :
 
@@ -27,7 +27,7 @@ Au premier lancement, chaque messagerie demande de se connecter (QR code pour Wh
 - **Indicateurs** : à droite de chaque compte, le nombre de non-lus, un point (nouveaux messages sans nombre, ex. Discord sans mention) ou un **!** orange (connexion requise, hors ligne, page plantée), expliqué sous le nom. En colonne d'icônes, ils deviennent des pastilles sur l'icône, et le survol donne le détail.
 - **Clic droit sur un compte** : couper les notifications de ce compte, recharger, revenir à l'accueil, renommer, ajouter un autre compte du même service, réparer (vider le cache), retirer.
 - **Ne pas déranger** (en bas de la barre) : un clic l'active ou le coupe, clic droit pour une durée (1 h, jusqu'à demain 8 h).
-- **⋯** : ajouter une messagerie (dont Telegram et LinkedIn), lancer au démarrage, diagnostic, journaux, quitter.
+- **⋯** : mise à jour, ajouter une messagerie (dont Telegram et LinkedIn), lancer au démarrage, diagnostic, journaux, quitter.
 - **Fermer la fenêtre ne quitte pas** : Yougo Msg reste près de l'horloge pour continuer à recevoir les messages. Pour quitter : clic droit sur l'icône près de l'horloge, ou menu ⋯.
 - **Démarrage avec le PC** : activé d'office dans la version installée (désactivable dans ⋯). L'app démarre alors directement dans la zone de notification.
 
@@ -47,19 +47,28 @@ Elles portent le nom du compte (« WhatsApp 2 · Marie ») et un clic ouvre la b
 | `Ctrl+molette`, `Ctrl+=` / `Ctrl+)` , `Ctrl+0` | Zoom du compte affiché (mémorisé), retour à 100 % |
 | `Ctrl+Maj+I` ou `F12` | Outils de développement du compte affiché |
 
+### Mises à jour
+
+La version installée regarde au démarrage, puis toutes les 6 h, si une version plus récente est publiée dans les [releases](https://github.com/yougo96/yougo_msg/releases) du dépôt, et la télécharge en arrière-plan. Quand elle est prête : une notification, une pastille sur **⋯**, et *Redémarrer pour passer à la version x.y.z* dans le menu ⋯ comme dans celui de l'icône près de l'horloge. Sans ce clic, elle s'installe quand on quitte l'app (Windows, AppImage). ⋯ → *Rechercher une mise à jour* vérifie tout de suite. La requête vers GitHub lit seulement la dernière version publiée : rien n'y identifie la machine.
+
+- **Linux, `.deb`** : l'installation demande le mot de passe administrateur, et seulement sur *Redémarrer* (jamais en quittant).
+- **AppImage** : la nouvelle, qui porte son numéro de version, remplace l'ancienne dans le même dossier ; le raccourci et le lancement au démarrage la suivent.
+- Rien en développement (`npm start`) ni avec un profil de test (`YOUGO_MSG_USER_DATA`).
+- **Depuis la 0.2.0**, qui n'a pas encore ce mécanisme : installer une fois à la main la première version publiée.
+
 ### Si une connexion Google est refusée
 
 Google refuse parfois les connexions depuis une app de bureau. Clic droit sur Google Chat ou Messages → **Connexion Google : mode compatibilité**, puis se connecter. Une fois connecté, on peut désactiver le mode : la session reste.
 
 ## Diagnostic
 
-Menu ⋯ → **Diagnostic** : pour chaque compte, l'état, d'où vient le compteur de non-lus (titre, lecture de la page, favicon) et ce que la page affiche, les notifications reçues, la mémoire et la visibilité. *Copier le rapport* donne un texte à coller ailleurs. Le journal (`%APPDATA%\Yougo Msg\logs`, ou `~/.config/Yougo Msg/logs`) note les échecs de chargement, les plantages, l'évolution des compteurs (des nombres, jamais le texte des messages) et un relevé mémoire tous les quarts d'heure. De quoi répondre aux questions ouvertes du playbook.
+Menu ⋯ → **Diagnostic** : l'état des mises à jour (dernière vérification, échec), puis, pour chaque compte, l'état, d'où vient le compteur de non-lus (titre, lecture de la page, favicon) et ce que la page affiche, les notifications reçues, la mémoire et la visibilité. *Copier le rapport* donne un texte à coller ailleurs. Le journal (`%APPDATA%\Yougo Msg\logs`, ou `~/.config/Yougo Msg/logs`) note les échecs de chargement, les plantages, l'évolution des compteurs (des nombres, jamais le texte des messages) et un relevé mémoire tous les quarts d'heure. De quoi répondre aux questions ouvertes du playbook.
 
 ## Linux
 
-`npm install` puis `npm run dist` **sur la machine Linux** produit un `.deb` et une AppImage dans `dist/`.
+Le `.deb` et l'AppImage sont dans les [releases](https://github.com/yougo96/yougo_msg/releases). Sinon, `npm install` puis `npm run dist` **sur la machine Linux** les produit dans `dist/`.
 
-- **Ubuntu / Debian** : `sudo apt install ./dist/Yougo-Msg-0.2.0.deb` (recommandé : raccourci, icône et bac à sable de Chromium actifs).
+- **Ubuntu / Debian** : `sudo apt install ./Yougo-Msg-<version>.deb` (recommandé : raccourci, icône et bac à sable de Chromium actifs).
 - **AppImage** (Fedora…) : `chmod +x` puis lancer. Elle crée son raccourci et son icône au premier lancement. Elle a besoin de `libfuse2` (`libfuse2t64` sur Ubuntu 24.04). Sur Ubuntu 24.04+, une AppImage Electron tourne sans le bac à sable de Chromium : préférer le `.deb`.
 - **Icône près de l'horloge** : native sous KDE ; sous GNOME, il faut l'extension AppIndicator (installée d'office sur Ubuntu). Sans elle, Yougo Msg le détecte et fermer la fenêtre la **réduit** au lieu de la cacher. Sous GNOME, l'icône s'ouvre d'un double-clic ; le clic droit donne le menu.
 - **Sessions** : les cookies sont stockés sans chiffrement par Electron (comme dans le POC) ; elles ne dépendent donc pas du trousseau GNOME/KDE. La protection repose sur le chiffrement du disque.
@@ -71,9 +80,18 @@ Une entrée dans [`src/services.js`](src/services.js) et le tracé du logo en SV
 
 Ajouter un service au catalogue ne le crée pas chez soi : il apparaît dans ⋯ → *Ajouter une messagerie* (ou d'office au premier lancement si `enabled` n'est pas `false`).
 
+## Publier une version
+
+```powershell
+npm version patch   # ou minor : lance npm test, passe package.json à la version suivante, committe « chore: version x.y.z » et crée le tag vx.y.z
+git push --follow-tags
+```
+
+Le tag lance le [workflow Release](.github/workflows/release.yml) sur GitHub Actions. Il construit l'installeur Windows, le `.deb` et l'AppImage, puis publie la release avec la liste des commits depuis la précédente (une dizaine de minutes, onglet *Actions* du dépôt). Les apps installées la proposent dans les 6 h. Le dépôt doit rester public : l'app lit les releases sans clé.
+
 ## Mettre à jour Electron (et donc Chromium)
 
-Pas de mise à jour automatique : il faut le faire à la main, régulièrement. Le menu ⋯ et le diagnostic préviennent quand l'Electron embarqué a plus de 60 jours.
+Chromium arrive avec Electron : il ne se met à jour que si l'on passe à un Electron récent, puis qu'on publie une version. À faire régulièrement : le menu ⋯ et le diagnostic préviennent quand l'Electron embarqué a plus de 60 jours.
 
 ```powershell
 npm run update:electron
@@ -82,12 +100,12 @@ npm run smoke
 npm run dist
 ```
 
-Après une nouvelle version majeure d'Electron, vérifier aussi à la main : changement de compte, clic sur une notification, fermeture de l'app.
+Après une nouvelle version majeure d'Electron, vérifier aussi à la main : changement de compte, clic sur une notification, fermeture de l'app. Ensuite, [publier une version](#publier-une-version).
 
 ## Tests
 
 - `npm test` : règles pures (compteurs, navigation, permissions, réglages, catalogue).
-- `npm run smoke` : lance la vraie app avec un **profil temporaire** (jamais le vôtre) sur les vraies pages des messageries, déconnectées. Il vérifie l'interception des notifications et le clic rejoué, la passkey silencieuse, la visibilité des pages masquées, les compteurs, la navigation, les permissions, la reprise après panne, et que le processus se termine vite après *Quitter*.
+- `npm run smoke` : lance la vraie app avec un **profil temporaire** (jamais le vôtre) sur les vraies pages des messageries, déconnectées. Il vérifie l'interception des notifications et le clic rejoué, la passkey silencieuse, la visibilité des pages masquées, les compteurs, la navigation, les permissions et la reprise après panne. Il fait aussi tourner electron-updater contre un serveur local qui annonce une version 99.0.0 : téléchargement, notification, pastille, puis *Redémarrer*, qui doit fermer les pages avant l'installeur (simulé) et terminer le processus vite.
 
 ## Structure
 
@@ -103,6 +121,7 @@ src/
   policy.js          règles de navigation, de fenêtres et de permissions
   accounts.js, settings.js   comptes et réglages (écriture atomique, reprise du POC)
   legacy.js          reprise de l'ancien nom, HP Message (profil, lancement au démarrage)
+  updates.js         mises à jour depuis les releases GitHub (electron-updater)
   tray.js, autostart.js, linux.js, context-menu.js, diagnostics.js, dialogs.js, log.js
   preload/           ponts : barre latérale, petites fenêtres, et service.js injecté dans les messageries
   ui/                barre latérale, Diagnostic, Renommer ; theme.css (DA de pradierh.fr), titlebar.js (bande de titre Windows),
@@ -111,6 +130,7 @@ src/
 test/                tests (node:test) et test de bout en bout (smoke)
 assets/              icône de l'app (PNG, ICO pour Windows, SVG de référence), pastille de secours ; services/ : logos des messageries (SVG, tuiles des notifications)
 scripts/             icons.js (régénère les icônes), stamp.js (date de l'Electron embarqué)
+.github/workflows/   release.yml : un tag vx.y.z construit et publie la release
 ```
 
 ## Apparence

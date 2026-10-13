@@ -6,6 +6,7 @@ const { summarize, badgeText } = require('./unread');
 const { Notifier } = require('./notifications');
 const views = require('./views');
 const autostart = require('./autostart');
+const updates = require('./updates');
 const { prompt } = require('./dialogs');
 const { TITLE_BAR_HEIGHT, titleBarOptions, pageQuery } = require('./titlebar');
 
@@ -46,6 +47,7 @@ class Hub {
     this.tray = null; // posé par main.js
     this.trayAvailable = true;
     this.quitting = false;
+    this.shutdownDone = null; // promesse de shutdown()
     this.fullscreenId = null;
     this.badgeImages = new Map(); // clé de pastille -> { tray, overlay } (nativeImage)
     this.indicatorKey = null;
@@ -477,6 +479,7 @@ class Hub {
       platform: process.platform,
       activeId: this.prefs.activeId,
       dnd: { on: this.dndActive(), label: this.dndLabel() },
+      update: { ready: updates.state.status === 'ready', version: updates.state.version },
       accounts: this.accounts.map((account) => {
         const rt = this.rt(account.id);
         return {
@@ -607,7 +610,8 @@ class Hub {
     const age = electronAge();
     Menu.buildFromTemplate([
       { label: `Yougo Msg ${app.getVersion()} · Electron ${process.versions.electron}`, enabled: false },
-      // Pas de mise à jour automatique : on prévient quand le Chromium embarqué vieillit.
+      ...updates.menuItems(),
+      // Chromium ne se met à jour qu'avec une nouvelle version de l'app : on prévient quand il vieillit.
       ...(age > ELECTRON_OLD_DAYS ? [{ label: `Electron a ${age} jours : npm run update:electron`, enabled: false }] : []),
       { type: 'separator' },
       ...this.appMenuItems(),
@@ -656,6 +660,23 @@ class Hub {
   }
 
   // ---------------------------------------------------------------- fermeture
+
+  // Avant de quitter ou d'installer une mise à jour : les pages d'abord (cf. passkey), puis l'écriture des
+  // réglages, des cookies et du stockage sur le disque. Une seule fois, même appelée deux fois ; ne rejette jamais.
+  shutdown() {
+    this.shutdownDone ??= (async () => {
+      this.store.flush();
+      const sessions = [...this.views.values()].map((view) => view.webContents.session);
+      await this.closeAllPages();
+      await Promise.allSettled(
+        sessions.map((ses) => {
+          ses.flushStorageData();
+          return ses.cookies.flushStore();
+        }),
+      );
+    })().catch((error) => this.log('warn', `fermeture : ${error.message}`));
+    return this.shutdownDone;
+  }
 
   // Ferme toutes les pages (vues et fenêtres d'appel) avant de quitter : une page encore ouverte peut retenir
   // le processus (demande de passkey en cours sous Windows).

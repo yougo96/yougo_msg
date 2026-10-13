@@ -11,8 +11,10 @@ const TOTAL_LIMIT_MS = 240000;
 const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'yougo-msg-smoke-'));
 const out = process.env.YOUGO_MSG_SMOKE_OUT ?? profile;
 
+// Cache des mises à jour (electron-updater) dans le profil de test, pas dans celui de l'app installée.
+const cache = path.join(profile, 'cache');
 const child = spawn(electron, [path.join(__dirname, 'smoke.js')], {
-  env: { ...process.env, YOUGO_MSG_USER_DATA: path.join(profile, 'userData'), YOUGO_MSG_SMOKE_OUT: out, YOUGO_MSG_QUIET: '1' },
+  env: { ...process.env, YOUGO_MSG_USER_DATA: path.join(profile, 'userData'), YOUGO_MSG_SMOKE_OUT: out, YOUGO_MSG_QUIET: '1', LOCALAPPDATA: cache, XDG_CACHE_HOME: cache },
   stdio: ['ignore', 'pipe', 'pipe'],
 });
 

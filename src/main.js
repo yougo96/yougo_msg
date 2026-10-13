@@ -15,6 +15,7 @@ const autostart = require('./autostart');
 const diagnostics = require('./diagnostics');
 const linux = require('./linux');
 const legacy = require('./legacy');
+const updates = require('./updates');
 
 const APP_ID = 'com.yougo.msg'; // = build.appId dans package.json (vérifié par test/services.test.js)
 
@@ -200,6 +201,7 @@ async function start() {
   }
 
   autostart.init(hub.prefs, () => hub.save(), log);
+  updates.init(hub);
   // Après une mise en veille ou un verrouillage, les comptes en erreur réessaient tout de suite.
   for (const event of ['resume', 'unlock-screen']) powerMonitor.on(event, () => setTimeout(() => views.retryFailed(hub), 5000));
 }
@@ -233,20 +235,7 @@ if (legacyProfile === 'busy') {
     hub.quitting = true;
     log('info', 'fermeture');
     startQuitWatchdog();
-    hub.store.flush();
-    (async () => {
-      // Pages d'abord (cf. passkey), puis écriture des cookies et du stockage sur le disque.
-      const sessions = [...hub.views.values()].map((view) => view.webContents.session);
-      await hub.closeAllPages();
-      await Promise.allSettled(
-        sessions.map((ses) => {
-          ses.flushStorageData();
-          return ses.cookies.flushStore();
-        }),
-      );
-      quitPhase = 'done';
-      app.quit();
-    })().catch(() => {
+    hub.shutdown().then(() => {
       quitPhase = 'done';
       app.quit();
     });

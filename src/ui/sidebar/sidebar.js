@@ -3,6 +3,7 @@ const summaryText = document.getElementById('summary');
 const dndButton = document.getElementById('dnd');
 const dndState = document.getElementById('dnd-state');
 const menuButton = document.getElementById('menu');
+const MENU_TITLE = menuButton.title;
 const panel = document.getElementById('panel');
 const panelTitle = document.getElementById('panel-title');
 const panelText = document.getElementById('panel-text');
@@ -175,6 +176,8 @@ function render(next) {
   dndButton.title = `Ne pas déranger : ${state.dnd.label.toLowerCase()}\nClic droit : choisir une durée`;
   // Version courte du libellé : « Activé » se voit déjà à l'état du bouton.
   dndState.textContent = state.dnd.label.replace(/^Activé j/, 'J');
+  menuButton.classList.toggle('update', state.update.ready);
+  menuButton.title = state.update.ready ? `Mise à jour prête (version ${state.update.version}) : ouvrir ce menu pour redémarrer` : MENU_TITLE;
 
   renderPanel();
   for (const key of state.badgeRequests) window.hub.badgeImages(key, window.badgeArt.images(key, state.platform));

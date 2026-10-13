@@ -1,7 +1,8 @@
-// Icône près de l'horloge : pastille des non-lus, comptes en attente, ne pas déranger, quitter.
+// Icône près de l'horloge : pastille des non-lus, comptes en attente, mise à jour prête, ne pas déranger, quitter.
 const { Menu, Tray, nativeImage } = require('electron');
 const path = require('node:path');
 const { badgeText } = require('./unread');
+const updates = require('./updates');
 
 const ICON = path.join(__dirname, '..', 'assets', 'icon.png');
 
@@ -26,7 +27,7 @@ class AppTray {
     const waiting = hub.accounts
       .map((account) => ({ account, unread: hub.rt(account.id)?.unread }))
       .filter(({ account, unread }) => !account.muted && (unread?.count || unread?.dot));
-    const signature = JSON.stringify([count, dot, waiting.map(({ account, unread }) => [account.id, account.name, unread.count, unread.dot]), hub.dndActive(), hub.dndLabel()]);
+    const signature = JSON.stringify([count, dot, waiting.map(({ account, unread }) => [account.id, account.name, unread.count, unread.dot]), hub.dndActive(), hub.dndLabel(), updates.trayItems().length && updates.state.version]);
     if (!force && signature === this.signature) return;
     this.signature = signature;
 
@@ -36,6 +37,7 @@ class AppTray {
     this.tray.setContextMenu(
       Menu.buildFromTemplate([
         { label: 'Ouvrir Yougo Msg', click: () => hub.showWindow() },
+        ...updates.trayItems(),
         { type: 'separator' },
         // Le compteur figure aussi dans le menu : certains bureaux Linux n'affichent pas l'infobulle.
         ...(waiting.length

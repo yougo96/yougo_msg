@@ -286,6 +286,18 @@ button:focus-visible {
   stroke: none;
 }
 
+/* Mise à jour prête : le menu propose de redémarrer. */
+#menu.update::after {
+  content: '';
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius);
+  background: var(--accent);
+}
+
 #dnd {
   flex: 1;
   min-width: 0;

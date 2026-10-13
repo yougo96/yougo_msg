@@ -1,0 +1,63 @@
+# Publier une version : `npm version patch` (ou minor), puis `git push --follow-tags`. Le tag vx.y.z construit
+# l'installeur Windows, le .deb et l'AppImage, et les publie dans une release GitHub : les apps installées la
+# trouvent seules (src/updates.js).
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref_name }}
+
+jobs:
+  # Un seul brouillon, créé d'abord : les deux constructions y déposent leurs fichiers.
+  draft:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Le tag correspond à la version de package.json
+        run: test "$GITHUB_REF_NAME" = "v$(node -p "require('./package.json').version")"
+      - name: Brouillon de la release, avec les commits depuis la version précédente
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          previous=$(git describe --tags --abbrev=0 "$GITHUB_REF_NAME^" 2>/dev/null || true)
+          git log --pretty='- %s' --invert-grep --grep='^chore: version' ${previous:+"$previous.."}"$GITHUB_REF_NAME" > notes.md
+          gh release create "$GITHUB_REF_NAME" --draft --verify-tag --title "Yougo Msg ${GITHUB_REF_NAME#v}" --notes-file notes.md
+
+  build:
+    needs: draft
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    # PowerShell ferait disparaître le « -- » de npm run dist -- --publish always.
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run dist -- --publish always
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  # Publiée seulement quand Windows et Linux sont prêts : avant, les apps ne la voient pas.
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release edit "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --draft=false --latest

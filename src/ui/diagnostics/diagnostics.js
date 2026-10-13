@@ -42,10 +42,11 @@ function render(snapshot) {
     `démarré il y a ${snapshot.uptimeMin} min`,
     `mémoire ${snapshot.memoryKind} : ${(snapshot.totalMb / 1024).toFixed(2)} Go sur ${(snapshot.systemMb / 1024).toFixed(0)} Go`,
     `ne pas déranger : ${snapshot.dnd.toLowerCase()}`,
+    `mises à jour : ${snapshot.update}`,
   ].join(' · ');
   const warning = document.getElementById('warning');
   warning.hidden = !snapshot.electronOld;
-  warning.textContent = snapshot.electronOld ? `Electron a ${snapshot.electronAgeDays} jours : pensez à le mettre à jour (npm run update:electron puis npm run dist).` : '';
+  warning.textContent = snapshot.electronOld ? `Electron a ${snapshot.electronAgeDays} jours : pensez à le mettre à jour (npm run update:electron, puis publier une version).` : '';
 
   rows.replaceChildren(
     ...snapshot.accounts.map((account) => {

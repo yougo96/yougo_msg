@@ -5,12 +5,13 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { titleBarOptions, pageQuery } = require('./titlebar');
 const views = require('./views');
+const updates = require('./updates');
 
 const MEMORY_LOG_INTERVAL = 15 * 60e3;
 const ELECTRON_OLD_DAYS = 60;
 let win = null;
 
-// Électron (donc Chromium) n'a pas de mise à jour automatique ici : on signale quand il vieillit.
+// Chromium ne se met à jour qu'avec une nouvelle version de l'app : on signale quand l'Electron embarqué vieillit.
 function buildInfo() {
   try {
     return JSON.parse(fs.readFileSync(path.join(__dirname, 'build-info.json'), 'utf8'));
@@ -97,6 +98,7 @@ async function snapshot(hub) {
     electronAgeDays: electronAge(),
     electronOld: (electronAge() ?? 0) > ELECTRON_OLD_DAYS,
     builtAt: info?.builtAt ?? null,
+    update: updates.describe(),
     platform: `${process.platform} ${process.getSystemVersion()}`,
     uptimeMin: Math.round(process.uptime() / 60),
     dnd: hub.dndLabel(),

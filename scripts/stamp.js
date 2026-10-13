@@ -1,5 +1,5 @@
 // Avant `npm run dist` : note la date de publication de la version d'Electron embarquée.
-// L'app s'en sert pour signaler, sans réseau, quand son Chromium vieillit (pas de mise à jour automatique).
+// L'app s'en sert pour signaler, sans réseau, quand son Chromium vieillit (il ne change qu'avec une nouvelle version).
 const { execSync } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');

@@ -1,8 +1,11 @@
 // Test de bout en bout de la vraie app, sur les vraies pages des messageries (déconnectées), lancé par
 // run-smoke.js avec un profil temporaire. N'affiche aucune notification système et n'ouvre pas le navigateur.
 const { app, shell } = require('electron');
+const crypto = require('node:crypto');
 const fs = require('node:fs');
+const http = require('node:http');
 const path = require('node:path');
+const { NsisUpdater, DebUpdater } = require('electron-updater');
 
 if (!process.env.YOUGO_MSG_USER_DATA) throw new Error('profil de test manquant (lancer via npm run smoke)');
 const OUT = process.env.YOUGO_MSG_SMOKE_OUT;
@@ -16,6 +19,7 @@ shell.openExternal = async (url) => void opened.push(url);
 
 const { getHub } = require('../src/main.js');
 const views = require('../src/views.js');
+const updates = require('../src/updates.js');
 
 const results = [];
 const check = (name, ok, detail = '') => {
@@ -191,6 +195,47 @@ async function run() {
     views: ids.map((id) => `${id}:${hub.views.get(id).getVisible?.()}:${views.displayStatus(hub.rt(id))}:${hub.rt(id).popups.size}`),
   });
 
+  // Mise à jour : la vraie mécanique d'electron-updater, contre un serveur local qui annonce une version 99.0.0
+  // (faux installeur, jamais lancé). Le cache de téléchargement est dans le profil de test (run-smoke.js).
+  const infos = [];
+  hub.notifier.info = (title, body) => infos.push({ title, body });
+  const fake = crypto.randomBytes(256 * 1024);
+  const sha512 = crypto.createHash('sha512').update(fake).digest('base64');
+  const file = `Yougo-Msg-99.0.0.${process.platform === 'win32' ? 'exe' : 'deb'}`;
+  const feed = ['version: 99.0.0', 'files:', `  - url: ${file}`, `    sha512: ${sha512}`, `    size: ${fake.length}`, `path: ${file}`, `sha512: ${sha512}`, `releaseDate: '${new Date().toISOString()}'`, ''].join('\n');
+  const server = http.createServer((req, res) => {
+    const { pathname } = new URL(req.url, 'http://127.0.0.1'); // electron-updater ajoute ?noCache=…
+    if (/^\/latest(-linux)?\.yml$/.test(pathname)) res.end(feed);
+    else if (pathname === `/${file}`) res.end(fake);
+    else res.writeHead(404).end();
+  });
+  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+  const config = path.join(app.getPath('userData'), 'app-update.yml');
+  fs.writeFileSync(config, ['provider: generic', `url: http://127.0.0.1:${server.address().port}/`, 'updaterCacheDirName: yougo-msg-updater', ''].join('\n'));
+  const updater = process.platform === 'win32' ? new NsisUpdater() : new DebUpdater();
+  updater.forceDevUpdateConfig = true;
+  updater.updateConfigPath = config;
+  updater.disableDifferentialDownload = true;
+  // Jamais de vraie installation. « Redémarrer », à la fin du test, l'appelle juste avant de quitter : le
+  // résultat s'écrit tout de suite, le processus se termine aussitôt après.
+  updater.install = function (isSilent, isForceRunAfter) {
+    this.quitAndInstallCalled = true;
+    const pagesClosed = [...hub.views.values()].every((view) => !view.webContents || view.webContents.isDestroyed());
+    // Windows : l'installeur relance l'app ; .deb : l'app se relance elle-même.
+    check('Redémarrer : pages fermées, puis installeur silencieux', pagesClosed && isSilent && isForceRunAfter === (process.platform === 'win32'), { pagesClosed, isSilent, isForceRunAfter });
+    finish();
+    return true;
+  };
+  updates.start(updater, 0);
+  const ready = await waitFor(() => updates.state.status === 'ready', 20000);
+  check('mise à jour trouvée et téléchargée (electron-updater, serveur local)', ready && updates.state.version === '99.0.0', updates.describe());
+  check('mise à jour : notification « prête »', infos.length === 1 && infos[0].title === 'Mise à jour prête', infos);
+  await sleep(300);
+  const dot = await hub.win.webContents.executeJavaScript('document.getElementById("menu").classList.contains("update")');
+  check('mise à jour : pastille sur ⋯', dot);
+  const offered = [updates.menuItems()[0]?.label, updates.trayItems()[0]?.label];
+  check('mise à jour : menu ⋯ et zone de notification proposent de redémarrer', offered.every((label) => label === 'Redémarrer pour passer à la version 99.0.0'), offered);
+
   if (OUT) fs.writeFileSync(path.join(OUT, 'sidebar.png'), (await hub.win.webContents.capturePage()).toPNG());
 
   // Fenêtre étroite : la liste se replie en colonne d'icônes, et les pages suivent.
@@ -207,11 +252,27 @@ async function run() {
   check('réglages enregistrés', fs.existsSync(path.join(app.getPath('userData'), 'settings.json')));
   check('journal écrit', fs.existsSync(path.join(app.getPath('userData'), 'logs', 'yougo-msg.log')));
 
-  const failed = results.filter((result) => !result.ok);
-  console.log(`SMOKE_RESULT ${JSON.stringify({ total: results.length, failed: failed.length })}`);
-  if (OUT) fs.writeFileSync(path.join(OUT, 'smoke-results.json'), JSON.stringify(results, null, 2));
+  // Fin : « Redémarrer pour mettre à jour » doit fermer les pages avant l'installeur, puis quitter vite
+  // (run-smoke.js mesure la fermeture). Sous Linux, l'app se relancerait elle-même : pas pendant le test.
+  app.relaunch = () => {};
   console.log(`SMOKE_QUIT ${Date.now()}`);
+  if (updates.state.status === 'ready') {
+    return void updates.restart().catch((error) => {
+      check('Redémarrer : pages fermées, puis installeur silencieux', false, error.message);
+      finish();
+      app.quit();
+    });
+  }
+  check('Redémarrer : pages fermées, puis installeur silencieux', false, 'aucune mise à jour prête');
+  finish();
   app.quit();
+
+  function finish() {
+    server.close();
+    const failed = results.filter((result) => !result.ok);
+    console.log(`SMOKE_RESULT ${JSON.stringify({ total: results.length, failed: failed.length })}`);
+    if (OUT) fs.writeFileSync(path.join(OUT, 'smoke-results.json'), JSON.stringify(results, null, 2));
+  }
 }
 
 app.whenReady().then(() =>
