@@ -113,5 +113,5 @@ test/                tests (node:test) et test de bout en bout (smoke)
 - **Compteurs** : fiables par construction sur WhatsApp, Messenger et Discord (titre). Pour Instagram, Google Chat et Google Messages, ils viennent d'une lecture de la page qui peut casser à une mise à jour du site : le diagnostic montre alors « lecture : null » et la source de repli. Snapchat n'a pas été vérifié avec un compte connecté.
 - **Notifications** : relais testé avec des notifications simulées ; à confirmer avec de vrais messages pour chaque service.
 - **Connexion Google** dans l'app : à confirmer (mode compatibilité en secours).
-- **Windows** : quand la fenêtre est visible mais derrière d'autres, le compte affiché est considéré comme lu par sa messagerie (comme un onglet ouvert dans un navigateur).
+- **Fenêtre ouverte** : tant qu'une partie de la fenêtre se voit à l'écran, le compte affiché est considéré comme lu par sa messagerie (comme un onglet ouvert dans un navigateur). Sous Windows, une fenêtre entièrement recouverte, ou l'écran éteint, ne marque rien comme lu.
 - **messenger.com** répond toujours (vérifié le 13/10/2026) malgré l'annonce de sa fermeture ; `facebook.com` est autorisé dans la vue si Meta y redirige.

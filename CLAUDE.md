@@ -31,6 +31,7 @@ Avant de conclure un changement : `npm test`, plus `npm run smoke` dès que le p
 - Ne pas afficher de vraies notifications en développement : depuis Electron 41, la première notification crée un raccourci `Electron.lnk` dans le menu Démarrer. Le smoke test remplace `notifier.show`.
 - Ne jamais appeler `app.setLoginItemSettings` en test. `autostart.init` ne fait rien quand `HP_MESSAGE_USER_DATA` est défini.
 - Pour vérifier l'app packagée : lancer `dist\win-unpacked\HP Message.exe` avec `HP_MESSAGE_USER_DATA` et `--remote-debugging-port=<port>`, interroger les pages par CDP, puis tuer seulement ce processus.
+- Sous Windows, Chromium passe toutes les pages en `hidden` quand la fenêtre est entièrement recouverte ou l'écran éteint. Le smoke test désactive ce calcul (`CalculateNativeWinOcclusion`) pour rester stable.
 - Electron émet `did-finish-load` pour la page d'erreur juste après `did-fail-load` : c'est le rôle de `rt.failedLoad` dans `views.js`.
 
 ## Code

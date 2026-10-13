@@ -7,6 +7,10 @@ const path = require('node:path');
 if (!process.env.HP_MESSAGE_USER_DATA) throw new Error('profil de test manquant (lancer via npm run smoke)');
 const OUT = process.env.HP_MESSAGE_SMOKE_OUT;
 
+// Windows : une fenêtre recouverte, ou l'écran éteint pendant le test, rend toutes les pages « hidden ». Ce calcul
+// de Chromium est voulu dans l'app ; ici, on vérifie seulement que l'app masque et montre les bonnes vues.
+app.commandLine.appendSwitch('disable-features', 'CalculateNativeWinOcclusion');
+
 const opened = [];
 shell.openExternal = async (url) => void opened.push(url);
 

@@ -139,10 +139,10 @@ class Notifier {
   show(account, { title, body = '', silent = false, tag = '', frame = null, pageId = null }) {
     if (!this.supported() || this.throttled(account)) return;
     const linux = process.platform === 'linux';
-    const text = (value, max) => (linux ? escapeMarkup(clip(value, max)) : clip(value, max));
     const notification = new Notification({
-      title: text(title, 120),
-      body: text(body, 300),
+      title: clip(title, 120),
+      // Linux : seul le corps est lu comme du balisage, le titre est affiché tel quel.
+      body: linux ? escapeMarkup(clip(body, 300)) : clip(body, 300),
       icon: this.icon(account.service.id),
       silent,
       urgency: 'normal',

@@ -56,7 +56,7 @@ function createButton(account) {
 // Réordonner en glissant une icône sur une autre.
 function setupDrag(button, id) {
   const clear = () => button.classList.remove('drop-before', 'drop-after');
-  const after = (event) => event.offsetY > button.clientHeight / 2;
+  const after = (event) => event.clientY - button.getBoundingClientRect().top > button.clientHeight / 2;
   button.addEventListener('dragstart', (event) => {
     dragged = id;
     event.dataTransfer.effectAllowed = 'move';

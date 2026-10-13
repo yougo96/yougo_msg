@@ -15,6 +15,15 @@ const SIDEBAR_PRELOAD = path.join(__dirname, 'preload', 'sidebar.js');
 const APP_ICON = path.join(ASSETS, 'icon.png');
 // Une vue en erreur est masquée : la barre latérale affiche à sa place l'état et un bouton « Réessayer ».
 const HIDDEN_STATUSES = new Set(['offline', 'crashed']);
+// Après un chargement, la page met du temps à afficher ses non-lus : une hausse pendant ce délai n'est pas un nouveau message.
+const SETTLE_DELAY = 60e3;
+
+// « Jusqu'à demain 8 h » choisi en pleine nuit vise ce matin, pas le lendemain.
+function nextMorning(now = new Date()) {
+  const morning = new Date(now);
+  morning.setHours(now.getHours() < 5 ? 8 : 24 + 8, 0, 0, 0);
+  return morning.getTime();
+}
 
 class Hub {
   constructor({ catalog, store, log, userAgents }) {
@@ -225,6 +234,7 @@ class Hub {
     this.save();
     this.accounts = resolveAccounts(this.prefs.accounts, this.catalogById);
     this.pushState();
+    this.tray?.update();
   }
 
   addAccount(serviceId) {
@@ -308,7 +318,7 @@ class Hub {
 
   // mode : 'off', 'on' (jusqu'à réactivation), '1h', 'tomorrow' (demain 8 h)
   setDnd(mode) {
-    const until = { '1h': Date.now() + 3600e3, tomorrow: new Date(new Date().setHours(24 + 8, 0, 0, 0)).getTime() }[mode] ?? null;
+    const until = { '1h': Date.now() + 3600e3, tomorrow: nextMorning() }[mode] ?? null;
     this.prefs.dnd = mode !== 'off';
     this.prefs.dndUntil = this.prefs.dnd ? until : null;
     this.save();
@@ -316,6 +326,7 @@ class Hub {
     this.log('info', `ne pas déranger : ${mode}`);
     this.updateAllAudio();
     this.pushState();
+    this.tray?.update();
   }
 
   scheduleDndEnd() {
@@ -375,9 +386,8 @@ class Hub {
     if (previous.count !== null && next.count !== null && next.count !== previous.count) {
       this.log('info', `${id} : ${previous.count} → ${next.count} non lus (${next.source})`);
     }
-    const rose = previous.count !== null && ((next.count ?? 0) > (previous.count ?? 0) || (next.dot && !previous.dot));
-    // Juste après un chargement, le compteur « monte » de 0 à sa vraie valeur : ce n'est pas un nouveau message.
-    if (rose && rt.loadedAt && Date.now() - rt.loadedAt > 10e3) {
+    const rose = previous.count !== null && ((next.count ?? 0) > (previous.count ?? 0) || (next.dot && !previous.dot && !previous.count));
+    if (rose && rt.loadedAt && Date.now() - rt.loadedAt > SETTLE_DELAY) {
       this.notifier.onUnreadRise(account, next);
       if (!account.muted && !this.dndActive() && this.win?.isVisible() && !this.win.isFocused()) this.win.flashFrame(true);
     }
@@ -546,6 +556,7 @@ class Hub {
               click: (item) => {
                 this.prefs.closeToTray = item.checked;
                 this.save();
+                this.tray?.update(true);
               },
             },
           ]

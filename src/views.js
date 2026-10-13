@@ -73,7 +73,6 @@ function create(hub, account) {
   const rt = createRuntime(view);
   rt.tracker = new UnreadTracker(account.service.unread, (next, previous) => hub.onUnreadChange(id, next, previous));
   hub.runtime.set(id, rt);
-  if (account.zoom) wc.setZoomLevel(account.zoom);
 
   const update = (patch) => {
     if (hub.quitting || !hub.rt(id)) return;
@@ -103,7 +102,10 @@ function create(hub, account) {
     // Après un échec, Electron émet aussi did-finish-load pour la page d'erreur : ce n'est pas un succès.
     if (rt.failedLoad) return;
     clearTimeout(rt.retryTimer);
-    update({ status: 'ready', loadedAt: Date.now(), retryAt: null, retryCount: 0, error: null, url: wc.getURL(), loggedOut: isLoggedOut(getService(), wc.getURL()) });
+    // Le zoom ne tient qu'une fois la page chargée (Chromium le range par domaine) : on le remet à chaque chargement.
+    const zoomLevel = hub.account(id)?.zoom ?? 0;
+    if (wc.getZoomLevel() !== zoomLevel) wc.setZoomLevel(zoomLevel);
+    update({ status: 'ready', unresponsive: false, loadedAt: Date.now(), retryAt: null, retryCount: 0, error: null, url: wc.getURL(), loggedOut: isLoggedOut(getService(), wc.getURL()) });
     scheduleProbe(hub, id, 1500);
   });
   wc.on('did-fail-load', (_event, errorCode, errorDescription, validatedURL, isMainFrame) => {
@@ -133,7 +135,7 @@ function create(hub, account) {
     rt.unread = { count: null, dot: false, source: null };
     const now = Date.now();
     rt.crashes = [...rt.crashes.filter((at) => now - at < CRASH_WINDOW), now];
-    update({ status: 'crashed', error: `Arrêt de la page (${details.reason})` });
+    update({ status: 'crashed', unresponsive: false, error: `Arrêt de la page (${details.reason})` });
     // Plus de 3 plantages en 10 min : on arrête de relancer seul, l'utilisateur décidera.
     if (rt.crashes.length <= CRASH_RETRY.length) scheduleRetry(hub, id, CRASH_RETRY, () => wc.reload(), rt.crashes.length - 1);
   });
@@ -262,7 +264,9 @@ function load(hub, id, url) {
   if (!view || !rt || view.webContents.isDestroyed()) return;
   clearTimeout(rt.retryTimer);
   rt.retryAt = null;
-  rt.status = 'loading';
+  // Une page déjà affichée le reste pendant le rechargement : si la navigation est annulée (beforeunload,
+  // redirection bloquée), aucun événement ne viendrait la sortir de « chargement ».
+  if (rt.status !== 'ready') rt.status = 'loading';
   view.webContents.loadURL(url ?? hub.account(id).service.url).catch(() => {}); // les échecs passent par did-fail-load
   hub.updateViews();
   hub.pushState();

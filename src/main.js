@@ -75,9 +75,11 @@ function startQuitWatchdog() {
   const exe = process.execPath;
   try {
     if (process.platform === 'win32') {
-      // `timeout` ne marche pas sans console : `ping` sert de pause.
-      const command = `"ping -n 11 127.0.0.1 >nul & taskkill /F /T /FI "PID eq ${pid}" /FI "IMAGENAME eq ${path.basename(exe)}" >nul 2>nul"`;
-      spawn('cmd.exe', ['/d', '/s', '/c', command], { detached: true, stdio: 'ignore', windowsHide: true, windowsVerbatimArguments: true }).unref();
+      // Windows réattribue vite les PID : un processus démarré après la demande de fermeture n'est pas nous
+      // (par exemple l'app relancée aussitôt), on ne le tue pas.
+      const quitAt = Date.now();
+      const script = `Start-Sleep -Seconds 10; $p = Get-Process -Id ${pid} -ErrorAction SilentlyContinue; if ($p -and $p.StartTime.ToUniversalTime() -lt [DateTimeOffset]::FromUnixTimeMilliseconds(${quitAt}).UtcDateTime) { taskkill.exe /F /T /PID ${pid} }`;
+      spawn('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', script], { detached: true, stdio: 'ignore', windowsHide: true }).unref();
     } else if (process.platform === 'linux') {
       const quoted = `'${exe.replace(/'/g, `'\\''`)}'`;
       spawn('sh', ['-c', `sleep 10; [ "$(readlink /proc/${pid}/exe)" = ${quoted} ] && kill -9 ${pid}`], { detached: true, stdio: 'ignore' }).unref();
@@ -195,7 +197,8 @@ if (!app.requestSingleInstanceLock()) {
   app.quit();
 } else {
   // Deuxième lancement (raccourci, menu des applications) : on montre la fenêtre déjà ouverte.
-  app.on('second-instance', () => hub?.showWindow());
+  // Pendant la fermeture, la fenêtre ne peut plus être montrée : l'app se relance une fois fermée.
+  app.on('second-instance', () => (hub?.quitting ? app.relaunch({ args: process.argv.slice(1).filter((arg) => arg !== '--hidden') }) : hub?.showWindow()));
   // La fenêtre principale ne se ferme qu'en quittant : rien à faire quand une autre fenêtre se ferme.
   app.on('window-all-closed', () => {});
 
