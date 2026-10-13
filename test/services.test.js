@@ -35,10 +35,11 @@ function readPng(file) {
 }
 
 test('identité de l’app alignée avec package.json', () => {
-  const main = fs.readFileSync(path.join(__dirname, '..', 'src', 'main.js'), 'utf8');
-  assert.match(main, new RegExp(`const APP_ID = '${pkg.build.appId.replace(/\./g, '\\.')}'`));
-  assert.equal(pkg.desktopName, 'com.hp.message.desktop');
-  assert.match(fs.readFileSync(path.join(__dirname, '..', 'src', 'linux.js'), 'utf8'), /DESKTOP_ID = 'com\.hp\.message'/);
+  const declares = (file, name) => new RegExp(`const ${name} = '${pkg.build.appId.replace(/\./g, '\\.')}'`).test(fs.readFileSync(path.join(ROOT, 'src', file), 'utf8'));
+  assert.ok(declares('main.js', 'APP_ID'));
+  assert.ok(declares('autostart.js', 'NAME'));
+  assert.equal(pkg.desktopName, `${pkg.build.appId}.desktop`);
+  assert.equal(require('../src/linux').DESKTOP_ID, pkg.build.appId);
 });
 
 test('chaque messagerie est complète et cohérente', () => {

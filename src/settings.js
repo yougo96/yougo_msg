@@ -159,4 +159,4 @@ class SettingsStore {
   }
 }
 
-module.exports = { SettingsStore, normalize, defaults, VERSION };
+module.exports = { SettingsStore, normalize, defaults, renameWithRetry, VERSION };

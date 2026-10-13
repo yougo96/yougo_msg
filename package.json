@@ -1,13 +1,13 @@
 {
-  "name": "hp-message",
-  "productName": "HP Message",
+  "name": "yougo-msg",
+  "productName": "Yougo Msg",
   "version": "0.2.0",
   "description": "Toutes mes messageries dans une seule fenêtre",
   "author": "pradier-h",
   "license": "UNLICENSED",
   "private": true,
   "main": "src/main.js",
-  "desktopName": "com.hp.message.desktop",
+  "desktopName": "com.yougo.msg.desktop",
   "engines": {
     "node": ">=22.12"
   },
@@ -25,7 +25,7 @@
     "electron-builder": "^26.15.3"
   },
   "build": {
-    "appId": "com.hp.message",
+    "appId": "com.yougo.msg",
     "files": [
       "src/**/*",
       "assets/**/*",
@@ -43,7 +43,7 @@
       "icon": "assets/icon.ico"
     },
     "nsis": {
-      "artifactName": "HP-Message-Setup-${version}.${ext}"
+      "artifactName": "Yougo-Msg-Setup-${version}.${ext}"
     },
     "linux": {
       "target": [
@@ -53,7 +53,7 @@
       "icon": "assets/icon.png",
       "category": "Network",
       "syncDesktopName": true,
-      "artifactName": "HP-Message-${version}.${ext}"
+      "artifactName": "Yougo-Msg-${version}.${ext}"
     }
   }
 }

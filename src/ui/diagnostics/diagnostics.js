@@ -36,7 +36,7 @@ function probeText(probe) {
 function render(snapshot) {
   last = snapshot;
   document.getElementById('summary').textContent = [
-    `HP Message ${snapshot.version}`,
+    `Yougo Msg ${snapshot.version}`,
     `Electron ${snapshot.versions.electron} (Chromium ${snapshot.versions.chrome})`,
     snapshot.platform,
     `démarré il y a ${snapshot.uptimeMin} min`,

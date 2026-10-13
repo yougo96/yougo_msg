@@ -1,4 +1,4 @@
-# HP Message
+# Yougo Msg
 
 Toutes mes messageries dans une seule fenêtre : Messenger, WhatsApp, Instagram, Snapchat, Google Chat, Google Messages (SMS) et Discord. Une barre à gauche, la messagerie à droite, et je vois d'un coup d'œil où l'on m'a écrit. Le pourquoi est dans le [playbook](PLAYBOOK_yougo_msg.md).
 
@@ -6,9 +6,9 @@ Les versions web officielles sont affichées telles quelles, chacune avec sa pro
 
 ## Lancer
 
-**Quitter d'abord le POC s'il tourne** (clic droit sur son icône près de l'horloge → *Quitter*) : les deux partagent le même profil, et tant que le POC est ouvert, HP Message se ferme aussitôt en ouvrant la fenêtre du POC.
+**En venant de HP Message** (l'ancien nom de l'app, et celui du POC) : au premier lancement, Yougo Msg reprend son profil, donc ses connexions, ses comptes et ses réglages. La version installée remplace aussi son lancement au démarrage. Il faut d'abord quitter HP Message (clic droit sur son icône près de l'horloge → *Quitter*) : tant qu'il est ouvert, Yougo Msg le signale et s'arrête. Ensuite, désinstaller HP Message (Paramètres → Applications ; sous Linux, `sudo apt remove hp-message`).
 
-**Version installée** : `npm run dist`, puis double-clic sur `dist\HP-Message-Setup-0.2.0.exe`. L'app n'est pas signée : à la première installation, Windows affiche « Windows a protégé votre ordinateur » → *Informations complémentaires* → *Exécuter quand même*. Elle remplace le POC (même identité) et **reprend ses connexions** : pas besoin de se reconnecter.
+**Version installée** : `npm run dist`, puis double-clic sur `dist\Yougo-Msg-Setup-0.2.0.exe`. L'app n'est pas signée : à la première installation, Windows affiche « Windows a protégé votre ordinateur » → *Informations complémentaires* → *Exécuter quand même*.
 
 **Version de développement** (Node.js 22.12 ou plus, 24 conseillé, cf. `.nvmrc`) :
 
@@ -28,7 +28,7 @@ Au premier lancement, chaque messagerie demande de se connecter (QR code pour Wh
 - **Clic droit sur un compte** : couper les notifications de ce compte, recharger, revenir à l'accueil, renommer, ajouter un autre compte du même service, réparer (vider le cache), retirer.
 - **Ne pas déranger** (en bas de la barre) : un clic l'active ou le coupe, clic droit pour une durée (1 h, jusqu'à demain 8 h).
 - **⋯** : ajouter une messagerie (dont Telegram et LinkedIn), lancer au démarrage, diagnostic, journaux, quitter.
-- **Fermer la fenêtre ne quitte pas** : HP Message reste près de l'horloge pour continuer à recevoir les messages. Pour quitter : clic droit sur l'icône près de l'horloge, ou menu ⋯.
+- **Fermer la fenêtre ne quitte pas** : Yougo Msg reste près de l'horloge pour continuer à recevoir les messages. Pour quitter : clic droit sur l'icône près de l'horloge, ou menu ⋯.
 - **Démarrage avec le PC** : activé d'office dans la version installée (désactivable dans ⋯). L'app démarre alors directement dans la zone de notification.
 
 Le total des non-lus (comptes non coupés) s'affiche dans le titre de la fenêtre, sur l'icône de la barre des tâches et sur l'icône près de l'horloge.
@@ -53,15 +53,15 @@ Google refuse parfois les connexions depuis une app de bureau. Clic droit sur Go
 
 ## Diagnostic
 
-Menu ⋯ → **Diagnostic** : pour chaque compte, l'état, d'où vient le compteur de non-lus (titre, lecture de la page, favicon) et ce que la page affiche, les notifications reçues, la mémoire et la visibilité. *Copier le rapport* donne un texte à coller ailleurs. Le journal (`%APPDATA%\HP Message\logs`, ou `~/.config/HP Message/logs`) note les échecs de chargement, les plantages, l'évolution des compteurs (des nombres, jamais le texte des messages) et un relevé mémoire tous les quarts d'heure. De quoi répondre aux questions ouvertes du playbook.
+Menu ⋯ → **Diagnostic** : pour chaque compte, l'état, d'où vient le compteur de non-lus (titre, lecture de la page, favicon) et ce que la page affiche, les notifications reçues, la mémoire et la visibilité. *Copier le rapport* donne un texte à coller ailleurs. Le journal (`%APPDATA%\Yougo Msg\logs`, ou `~/.config/Yougo Msg/logs`) note les échecs de chargement, les plantages, l'évolution des compteurs (des nombres, jamais le texte des messages) et un relevé mémoire tous les quarts d'heure. De quoi répondre aux questions ouvertes du playbook.
 
 ## Linux
 
 `npm install` puis `npm run dist` **sur la machine Linux** produit un `.deb` et une AppImage dans `dist/`.
 
-- **Ubuntu / Debian** : `sudo apt install ./dist/HP-Message-0.2.0.deb` (recommandé : raccourci, icône et bac à sable de Chromium actifs).
+- **Ubuntu / Debian** : `sudo apt install ./dist/Yougo-Msg-0.2.0.deb` (recommandé : raccourci, icône et bac à sable de Chromium actifs).
 - **AppImage** (Fedora…) : `chmod +x` puis lancer. Elle crée son raccourci et son icône au premier lancement. Elle a besoin de `libfuse2` (`libfuse2t64` sur Ubuntu 24.04). Sur Ubuntu 24.04+, une AppImage Electron tourne sans le bac à sable de Chromium : préférer le `.deb`.
-- **Icône près de l'horloge** : native sous KDE ; sous GNOME, il faut l'extension AppIndicator (installée d'office sur Ubuntu). Sans elle, HP Message le détecte et fermer la fenêtre la **réduit** au lieu de la cacher. Sous GNOME, l'icône s'ouvre d'un double-clic ; le clic droit donne le menu.
+- **Icône près de l'horloge** : native sous KDE ; sous GNOME, il faut l'extension AppIndicator (installée d'office sur Ubuntu). Sans elle, Yougo Msg le détecte et fermer la fenêtre la **réduit** au lieu de la cacher. Sous GNOME, l'icône s'ouvre d'un double-clic ; le clic droit donne le menu.
 - **Sessions** : les cookies sont stockés sans chiffrement par Electron (comme dans le POC) ; elles ne dépendent donc pas du trousseau GNOME/KDE. La protection repose sur le chiffrement du disque.
 - **Correcteur orthographique** : les dictionnaires français et anglais sont téléchargés une fois depuis Google au premier usage (aucun texte n'est envoyé). Sous Windows, c'est le correcteur du système.
 
@@ -102,6 +102,7 @@ src/
   unread.js          compteur de non-lus d'un compte (titre, page, favicon, pastille)
   policy.js          règles de navigation, de fenêtres et de permissions
   accounts.js, settings.js   comptes et réglages (écriture atomique, reprise du POC)
+  legacy.js          reprise de l'ancien nom, HP Message (profil, lancement au démarrage)
   tray.js, autostart.js, linux.js, context-menu.js, diagnostics.js, dialogs.js, log.js
   preload/           ponts : barre latérale, petites fenêtres, et service.js injecté dans les messageries
   ui/                barre latérale, Diagnostic, Renommer ; theme.css (DA de pradierh.fr), titlebar.js (bande de titre Windows),

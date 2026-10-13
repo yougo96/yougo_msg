@@ -8,11 +8,11 @@ const electron = require('electron');
 
 const QUIT_LIMIT_MS = 15000;
 const TOTAL_LIMIT_MS = 240000;
-const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'hp-message-smoke-'));
-const out = process.env.HP_MESSAGE_SMOKE_OUT ?? profile;
+const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'yougo-msg-smoke-'));
+const out = process.env.YOUGO_MSG_SMOKE_OUT ?? profile;
 
 const child = spawn(electron, [path.join(__dirname, 'smoke.js')], {
-  env: { ...process.env, HP_MESSAGE_USER_DATA: path.join(profile, 'userData'), HP_MESSAGE_SMOKE_OUT: out, HP_MESSAGE_QUIET: '1' },
+  env: { ...process.env, YOUGO_MSG_USER_DATA: path.join(profile, 'userData'), YOUGO_MSG_SMOKE_OUT: out, YOUGO_MSG_QUIET: '1' },
   stdio: ['ignore', 'pipe', 'pipe'],
 });
 

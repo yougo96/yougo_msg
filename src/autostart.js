@@ -2,9 +2,10 @@
 // L'app démarre alors avec --hidden, directement dans la zone de notification.
 const { app } = require('electron');
 const linux = require('./linux');
+const legacy = require('./legacy');
 
-// Nom de l'entrée dans le registre : l'AppUserModelId, comme le POC, pour reprendre son entrée sans doublon.
-const NAME = 'com.hp.message';
+// Nom de l'entrée dans le registre : l'AppUserModelId.
+const NAME = 'com.yougo.msg';
 // Version installée seulement : en développement, l'entrée pointerait vers electron.exe.
 const supported = () => app.isPackaged && (process.platform === 'win32' || process.platform === 'linux');
 
@@ -23,6 +24,12 @@ function isEnabled() {
   return settings.executableWillLaunchAtLogin ?? settings.openAtLogin;
 }
 
+// Entrée de l'ancien nom (HP Message, cf. legacy.js) : elle lancerait l'ancienne app au démarrage.
+function removeLegacy() {
+  if (process.platform === 'linux') linux.removeIntegration(legacy.ID);
+  else app.setLoginItemSettings({ openAtLogin: false, name: legacy.ID });
+}
+
 function setEnabled(enabled) {
   if (!supported()) return;
   if (process.platform === 'linux') linux.setAutostart(enabled, launchArgv());
@@ -33,9 +40,10 @@ function setEnabled(enabled) {
 // Sous Linux, on réécrit l'entrée si l'AppImage a changé de place.
 function init(prefs, save, log) {
   // Profil de test : ne jamais inscrire l'exécutable testé au démarrage de Windows.
-  if (!supported() || process.env.HP_MESSAGE_USER_DATA) return;
+  if (!supported() || process.env.YOUGO_MSG_USER_DATA) return;
   try {
     if (!prefs.autostartInitialized) {
+      removeLegacy();
       setEnabled(true);
       prefs.autostartInitialized = true;
       save();

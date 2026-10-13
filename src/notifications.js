@@ -106,7 +106,7 @@ class Notifier {
     this.fallbackTimers.delete(accountId);
   }
 
-  // Message de l'app elle-même (ex. « HP Message reste ouvert »).
+  // Message de l'app elle-même (ex. « Yougo Msg reste ouvert »).
   info(title, body) {
     if (!this.supported()) return;
     const notification = new Notification({ title, body, icon: path.join(__dirname, '..', 'assets', 'icon.png') });

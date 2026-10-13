@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 
-const DESKTOP_ID = 'com.hp.message'; // = desktopName dans package.json, sans « .desktop »
+const DESKTOP_ID = 'com.yougo.msg'; // = desktopName dans package.json, sans « .desktop »
 
 const run = (command, args) =>
   new Promise((resolve) => execFile(command, args, { timeout: 2000 }, (error, stdout) => resolve(error ? null : String(stdout))));
@@ -54,7 +54,9 @@ function desktopEntry({ name, comment, argv, icon, extra = [] }) {
 
 const configHome = () => process.env.XDG_CONFIG_HOME || path.join(os.homedir(), '.config');
 const dataHome = () => process.env.XDG_DATA_HOME || path.join(os.homedir(), '.local', 'share');
-const autostartFile = () => path.join(configHome(), 'autostart', `${DESKTOP_ID}.desktop`);
+const autostartFile = (id = DESKTOP_ID) => path.join(configHome(), 'autostart', `${id}.desktop`);
+const launcherFile = (id = DESKTOP_ID) => path.join(dataHome(), 'applications', `${id}.desktop`);
+const iconFile = (id = DESKTOP_ID) => path.join(dataHome(), 'icons', 'hicolor', '512x512', 'apps', `${id}.png`);
 
 function getAutostart() {
   try {
@@ -73,7 +75,7 @@ function setAutostart(enabled, launchArgv) {
   fs.writeFileSync(
     file,
     desktopEntry({
-      name: 'HP Message',
+      name: 'Yougo Msg',
       comment: 'Toutes mes messageries dans une seule fenêtre',
       argv: [...launchArgv, '--hidden'],
       icon: DESKTOP_ID,
@@ -85,13 +87,13 @@ function setAutostart(enabled, launchArgv) {
 // Une AppImage n'installe ni raccourci ni icône : sans eux, pas d'icône dans le dock, pas de regroupement des
 // fenêtres sous Wayland, pas de pastille. On les écrit dans le dossier de l'utilisateur.
 function integrateAppImage(appImagePath, iconSource) {
-  const icon = path.join(dataHome(), 'icons', 'hicolor', '512x512', 'apps', `${DESKTOP_ID}.png`);
+  const icon = iconFile();
   fs.mkdirSync(path.dirname(icon), { recursive: true });
   fs.copyFileSync(iconSource, icon);
-  const file = path.join(dataHome(), 'applications', `${DESKTOP_ID}.desktop`);
+  const file = launcherFile();
   fs.mkdirSync(path.dirname(file), { recursive: true });
   const text = desktopEntry({
-    name: 'HP Message',
+    name: 'Yougo Msg',
     comment: 'Toutes mes messageries dans une seule fenêtre',
     argv: [appImagePath],
     icon: DESKTOP_ID,
@@ -100,7 +102,12 @@ function integrateAppImage(appImagePath, iconSource) {
   if (!fs.existsSync(file) || fs.readFileSync(file, 'utf8') !== text) fs.writeFileSync(file, text);
 }
 
+// Fichiers d'un ancien nom de l'app (cf. legacy.js) : démarrage, raccourci et icône de l'AppImage.
+function removeIntegration(id) {
+  for (const file of [autostartFile(id), launcherFile(id), iconFile(id)]) fs.rmSync(file, { force: true });
+}
+
 // Les serveurs de notifications GNOME et KDE interprètent un balisage dans le texte.
 const escapeMarkup = (text) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-module.exports = { DESKTOP_ID, trayHostAvailable, waitForTrayHost, execArg, desktopEntry, getAutostart, setAutostart, integrateAppImage, escapeMarkup, autostartFile };
+module.exports = { DESKTOP_ID, trayHostAvailable, waitForTrayHost, execArg, desktopEntry, getAutostart, setAutostart, integrateAppImage, removeIntegration, escapeMarkup, autostartFile };

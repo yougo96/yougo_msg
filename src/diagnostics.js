@@ -128,7 +128,7 @@ function openWindow(hub) {
   win = new BrowserWindow({
     width: 980,
     height: 640,
-    title: 'HP Message · Diagnostic',
+    title: 'Yougo Msg · Diagnostic',
     ...titleBarOptions,
     backgroundColor: '#13151a',
     autoHideMenuBar: true,

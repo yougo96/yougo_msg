@@ -70,8 +70,8 @@ function setupSession({ accountId, getService, getWindow, userAgent, log }) {
   ses.setDevicePermissionHandler(() => false);
   ses.setDisplayMediaRequestHandler((request, callback) => pickDisplay(getWindow, request, callback));
   // Préchargement au niveau de la session : il couvre aussi les fenêtres ouvertes par la page.
-  if (!ses.getPreloadScripts().some((script) => script.id === 'hp-service')) {
-    ses.registerPreloadScript({ type: 'frame', id: 'hp-service', filePath: SERVICE_PRELOAD });
+  if (!ses.getPreloadScripts().some((script) => script.id === 'yougo-service')) {
+    ses.registerPreloadScript({ type: 'frame', id: 'yougo-service', filePath: SERVICE_PRELOAD });
   }
   setupSpellcheck(ses);
   return ses;

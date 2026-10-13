@@ -1,5 +1,5 @@
 // Point d'entrée : réglages de démarrage, instance unique, branchements, fermeture propre.
-const { app, ipcMain, powerMonitor } = require('electron');
+const { app, dialog, ipcMain, powerMonitor } = require('electron');
 const { spawn } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -14,11 +14,17 @@ const views = require('./views');
 const autostart = require('./autostart');
 const diagnostics = require('./diagnostics');
 const linux = require('./linux');
+const legacy = require('./legacy');
 
-const APP_ID = 'com.hp.message'; // = build.appId dans package.json (vérifié par test/services.test.js)
+const APP_ID = 'com.yougo.msg'; // = build.appId dans package.json (vérifié par test/services.test.js)
 
 // Profil séparé pour les tests : un test ne doit jamais toucher au vrai profil (sessions des messageries).
-if (process.env.HP_MESSAGE_USER_DATA) app.setPath('userData', path.resolve(process.env.HP_MESSAGE_USER_DATA));
+if (process.env.YOUGO_MSG_USER_DATA) app.setPath('userData', path.resolve(process.env.YOUGO_MSG_USER_DATA));
+
+// Premier lancement après le renommage : on reprend le profil de HP Message, donc ses connexions.
+const legacyProfile = process.env.YOUGO_MSG_USER_DATA
+  ? 'none'
+  : legacy.adoptProfile(path.join(app.getPath('appData'), legacy.PRODUCT_NAME), app.getPath('userData'));
 
 if (process.platform === 'linux') {
   // Les cookies ne sont pas chiffrés (fusible cookieEncryption désactivé) : les sessions ne dépendent pas du
@@ -29,7 +35,7 @@ if (process.platform === 'linux') {
 if (process.platform === 'win32') {
   // Identité des notifications Windows. Installé : = appId, comme le raccourci créé par l'installeur.
   app.setAppUserModelId(app.isPackaged ? APP_ID : `${APP_ID}.dev`);
-  app.setToastActivatorCLSID(app.isPackaged ? '{E88BD6EF-F390-43E3-84C6-5F3748766115}' : '{A8783146-F145-4634-A378-0C0D8CD28B36}');
+  app.setToastActivatorCLSID(app.isPackaged ? '{A7713F8C-3675-42FF-B66F-C01E9D35DB17}' : '{9B888271-002F-4067-8F81-913832F2C5FE}');
 }
 
 // UA d'un Chrome standard : sans les jetons « Electron/x » ou du nom de l'app que WhatsApp, Snapchat et
@@ -149,6 +155,11 @@ async function start() {
   log('info', `démarrage ${app.getVersion()} (Electron ${process.versions.electron}, ${process.platform})${app.isPackaged ? '' : ' [dev]'}`);
 
   const store = new SettingsStore(path.join(userData, 'settings.json'), CATALOG, log);
+  if (legacyProfile === 'moved') {
+    log('info', 'profil de HP Message repris');
+    // Son entrée de démarrage lançait l'ancienne app : la version installée la remplacera par la sienne.
+    store.data.autostartInitialized = false;
+  }
   deletePendingPartitions(store);
   hub = new Hub({ catalog: CATALOG, store, log, userAgents });
   registerIpc();
@@ -193,7 +204,18 @@ async function start() {
   for (const event of ['resume', 'unlock-screen']) powerMonitor.on(event, () => setTimeout(() => views.retryFailed(hub), 5000));
 }
 
-if (!app.requestSingleInstanceLock()) {
+if (legacyProfile === 'busy') {
+  // Rien ne démarre : le profil reste à reprendre au prochain lancement.
+  app.whenReady().then(() => {
+    dialog.showMessageBoxSync({
+      type: 'info',
+      title: 'Yougo Msg',
+      message: 'HP Message est encore ouvert',
+      detail: 'Yougo Msg reprend ses connexions au premier lancement. Quittez HP Message (clic droit sur son icône près de l’horloge → Quitter), puis relancez Yougo Msg.',
+    });
+    app.quit();
+  });
+} else if (!app.requestSingleInstanceLock()) {
   app.quit();
 } else {
   // Deuxième lancement (raccourci, menu des applications) : on montre la fenêtre déjà ouverte.

@@ -6,7 +6,7 @@ const path = require('node:path');
 const { SettingsStore, normalize, defaults } = require('../src/settings');
 const CATALOG = require('../src/services');
 
-const tempDir = () => fs.mkdtempSync(path.join(os.tmpdir(), 'hp-message-test-'));
+const tempDir = () => fs.mkdtempSync(path.join(os.tmpdir(), 'yougo-msg-test-'));
 
 test('premier lancement : un compte par messagerie activée, id = id de la messagerie', () => {
   const settings = defaults(CATALOG);

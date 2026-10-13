@@ -39,7 +39,7 @@ const DRAW_SERVICE = `window.drawService = async (svg, size, tile) => {
   return canvas.toDataURL('image/png');
 };0`;
 
-app.setPath('userData', fs.mkdtempSync(path.join(os.tmpdir(), 'hp-message-icons-')));
+app.setPath('userData', fs.mkdtempSync(path.join(os.tmpdir(), 'yougo-msg-icons-')));
 
 // Fichier .ico dont chaque image est un PNG (accepté depuis Windows Vista).
 function ico(images) {

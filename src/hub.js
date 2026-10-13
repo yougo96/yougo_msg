@@ -87,7 +87,7 @@ class Hub {
       ...bounds,
       minWidth: 720,
       minHeight: 480,
-      title: 'HP Message',
+      title: 'Yougo Msg',
       icon: APP_ICON,
       ...titleBarOptions,
       backgroundColor: '#13151a',
@@ -162,7 +162,7 @@ class Hub {
     this.prefs.trayHintShown = true;
     this.save();
     const where = process.platform === 'linux' ? 'son icône près de l’horloge (double-clic ou clic droit)' : 'son icône près de l’horloge (clic droit)';
-    this.notifier.info('HP Message reste ouvert', `Il continue de recevoir vos messages. Pour le rouvrir ou le quitter : ${where}.`);
+    this.notifier.info('Yougo Msg reste ouvert', `Il continue de recevoir vos messages. Pour le rouvrir ou le quitter : ${where}.`);
   }
 
   layout() {
@@ -273,7 +273,7 @@ class Hub {
       defaultId: 1,
       cancelId: 1,
       message: `Retirer ${account.name} ?`,
-      detail: 'Sa session sera effacée de HP Message : il faudra se reconnecter pour le rajouter.',
+      detail: 'Sa session sera effacée de Yougo Msg : il faudra se reconnecter pour le rajouter.',
     });
     if (response !== 0 || !this.account(id)) return;
     const index = this.accounts.findIndex((candidate) => candidate.id === id);
@@ -438,7 +438,7 @@ class Hub {
     if (signature === this.indicatorKey) return;
     this.indicatorKey = signature;
 
-    win.setTitle(summary.count ? `(${summary.count}) HP Message` : summary.dot ? '• HP Message' : 'HP Message');
+    win.setTitle(summary.count ? `(${summary.count}) Yougo Msg` : summary.dot ? '• Yougo Msg' : 'Yougo Msg');
     if (process.platform === 'win32') {
       const overlay = key ? (images?.overlay ?? nativeImage.createFromPath(path.join(ASSETS, 'badge.png'))) : null;
       win.setOverlayIcon(overlay, key ? `${summary.count || ''} non lus` : '');
@@ -599,14 +599,14 @@ class Hub {
   }
 
   quitMenuItem() {
-    return { label: 'Quitter HP Message', click: () => app.quit() };
+    return { label: 'Quitter Yougo Msg', click: () => app.quit() };
   }
 
   appMenu() {
     const { electronAge, ELECTRON_OLD_DAYS } = require('./diagnostics');
     const age = electronAge();
     Menu.buildFromTemplate([
-      { label: `HP Message ${app.getVersion()} · Electron ${process.versions.electron}`, enabled: false },
+      { label: `Yougo Msg ${app.getVersion()} · Electron ${process.versions.electron}`, enabled: false },
       // Pas de mise à jour automatique : on prévient quand le Chromium embarqué vieillit.
       ...(age > ELECTRON_OLD_DAYS ? [{ label: `Electron a ${age} jours : npm run update:electron`, enabled: false }] : []),
       { type: 'separator' },

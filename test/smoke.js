@@ -4,8 +4,8 @@ const { app, shell } = require('electron');
 const fs = require('node:fs');
 const path = require('node:path');
 
-if (!process.env.HP_MESSAGE_USER_DATA) throw new Error('profil de test manquant (lancer via npm run smoke)');
-const OUT = process.env.HP_MESSAGE_SMOKE_OUT;
+if (!process.env.YOUGO_MSG_USER_DATA) throw new Error('profil de test manquant (lancer via npm run smoke)');
+const OUT = process.env.YOUGO_MSG_SMOKE_OUT;
 
 // Windows : une fenêtre recouverte, ou l'écran éteint pendant le test, rend toutes les pages « hidden ». Ce calcul
 // de Chromium est voulu dans l'app ; ici, on vérifie seulement que l'app masque et montre les bonnes vues.
@@ -62,7 +62,7 @@ async function run() {
         `({
           shim: !/\\[native code\\]/.test(Function.prototype.toString.call(Notification)),
           permission: Notification.permission,
-          exposed: Object.keys(window).filter((key) => /hpMessage|__hp/i.test(key)),
+          exposed: Object.keys(window).filter((key) => /yougo|hpMessage|__hp/i.test(key)),
           conditional: window.PublicKeyCredential ? String(/\\[native code\\]/.test(String(PublicKeyCredential.isConditionalMediationAvailable))) : 'n/a',
           badge: 'setAppBadge' in Navigator.prototype ? !/\\[native code\\]/.test(String(Navigator.prototype.setAppBadge)) : 'n/a',
           visibility: document.visibilityState,
@@ -76,7 +76,7 @@ async function run() {
       check(`${id} : passkey silencieuse neutralisée`, info.conditional === 'false' || info.conditional === 'n/a', info.conditional);
       check(`${id} : setAppBadge intercepté`, info.badge === true || info.badge === 'n/a', String(info.badge));
       check(`${id} : visibilité ${active ? 'visible (affiché)' : 'hidden (masqué)'}`, info.visibility === (active ? 'visible' : 'hidden'), info.visibility);
-      check(`${id} : UA Chrome sans jeton Electron`, /Chrome\/\d+\.0\.0\.0 Safari\/537\.36$/.test(info.ua) && !/Electron|HP/i.test(info.ua), info.ua);
+      check(`${id} : UA Chrome sans jeton Electron`, /Chrome\/\d+\.0\.0\.0 Safari\/537\.36$/.test(info.ua) && !/Electron|Yougo/i.test(info.ua), info.ua);
     } catch (error) {
       check(`${id} : inspection de la page`, false, error.message);
     }
@@ -167,7 +167,7 @@ async function run() {
 
   // Hors ligne : la vue passe en erreur, la barre latérale le montre, nouvelle tentative programmée.
   const offlineId = ids.find((id) => id === 'snapchat') ?? ids[1];
-  views.load(hub, offlineId, 'https://hp-message-smoke.invalid/');
+  views.load(hub, offlineId, 'https://yougo-msg-smoke.invalid/');
   const offline = await waitFor(() => hub.rt(offlineId).status === 'offline', 15000);
   await sleep(1500);
   check('page injoignable -> hors ligne, nouvelle tentative programmée', offline && hub.rt(offlineId).status === 'offline' && hub.rt(offlineId).retryAt > Date.now(), { status: hub.rt(offlineId).status, retryAt: hub.rt(offlineId).retryAt });
@@ -205,7 +205,7 @@ async function run() {
   check('barre en liste, repliée quand la fenêtre est étroite', listX > 200 && compact, { liste: listX, repliee: hub.views.get(ids[3]).getBounds().x });
   if (OUT) fs.writeFileSync(path.join(OUT, 'sidebar-compact.png'), (await hub.win.webContents.capturePage()).toPNG());
   check('réglages enregistrés', fs.existsSync(path.join(app.getPath('userData'), 'settings.json')));
-  check('journal écrit', fs.existsSync(path.join(app.getPath('userData'), 'logs', 'hp-message.log')));
+  check('journal écrit', fs.existsSync(path.join(app.getPath('userData'), 'logs', 'yougo-msg.log')));
 
   const failed = results.filter((result) => !result.ok);
   console.log(`SMOKE_RESULT ${JSON.stringify({ total: results.length, failed: failed.length })}`);

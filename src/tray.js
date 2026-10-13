@@ -12,7 +12,7 @@ class AppTray {
     const size = process.platform === 'linux' ? 64 : 32;
     this.fallbackImage = nativeImage.createFromPath(ICON).resize({ width: size, height: size, quality: 'best' });
     this.tray = new Tray(this.fallbackImage);
-    this.tray.setToolTip('HP Message');
+    this.tray.setToolTip('Yougo Msg');
     // Linux : « click » = activation (double-clic sous GNOME) ; le menu reste le chemin sûr.
     this.tray.on('click', () => hub.showWindow());
     this.signature = null;
@@ -32,10 +32,10 @@ class AppTray {
 
     this.tray.setImage(hub.trayImage() ?? this.fallbackImage);
     const status = count ? `${count} non lu${count > 1 ? 's' : ''}` : dot ? 'Nouveaux messages' : 'Rien de nouveau';
-    this.tray.setToolTip(`HP Message · ${status}${hub.dndActive() ? ' · ne pas déranger' : ''}`);
+    this.tray.setToolTip(`Yougo Msg · ${status}${hub.dndActive() ? ' · ne pas déranger' : ''}`);
     this.tray.setContextMenu(
       Menu.buildFromTemplate([
-        { label: 'Ouvrir HP Message', click: () => hub.showWindow() },
+        { label: 'Ouvrir Yougo Msg', click: () => hub.showWindow() },
         { type: 'separator' },
         // Le compteur figure aussi dans le menu : certains bureaux Linux n'affichent pas l'infobulle.
         ...(waiting.length
