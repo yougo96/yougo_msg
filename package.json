@@ -1,0 +1,58 @@
+{
+  "name": "hp-message",
+  "productName": "HP Message",
+  "version": "0.2.0",
+  "description": "Toutes mes messageries dans une seule fenêtre",
+  "author": "pradier-h",
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "src/main.js",
+  "desktopName": "com.hp.message.desktop",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test \"test/*.test.js\"",
+    "smoke": "node test/run-smoke.js",
+    "predist": "node scripts/stamp.js",
+    "dist": "electron-builder",
+    "update:electron": "npm install --save-dev --save-exact electron@latest && npm install --save-dev electron-builder@latest"
+  },
+  "devDependencies": {
+    "electron": "44.7.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.hp.message",
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "electronFuses": {
+      "runAsNode": false,
+      "enableNodeOptionsEnvironmentVariable": false,
+      "enableNodeCliInspectArguments": false,
+      "onlyLoadAppFromAsar": true,
+      "enableCookieEncryption": false
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.png"
+    },
+    "nsis": {
+      "artifactName": "HP-Message-Setup-${version}.${ext}"
+    },
+    "linux": {
+      "target": [
+        "deb",
+        "AppImage"
+      ],
+      "icon": "assets/icon.png",
+      "category": "Network",
+      "syncDesktopName": true,
+      "artifactName": "HP-Message-${version}.${ext}"
+    }
+  }
+}

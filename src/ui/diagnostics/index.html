@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'">
+  <title>HP Message · Diagnostic</title>
+  <link rel="stylesheet" href="diagnostics.css">
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Diagnostic</h1>
+      <p id="summary"></p>
+      <p id="warning" hidden></p>
+    </div>
+    <div class="actions">
+      <button id="copy">Copier le rapport</button>
+      <button id="logs">Journaux</button>
+    </div>
+  </header>
+  <main>
+    <table>
+      <thead>
+        <tr>
+          <th>Compte</th>
+          <th>État</th>
+          <th>Non-lus</th>
+          <th title="D'où vient le compteur, et ce que la page affiche">Source du compteur</th>
+          <th title="Notifications reçues de la page / créées par l'app (compteur en hausse) / bloquées (ne pas déranger, compte coupé)">Notif. page / app / bloquées</th>
+          <th title="Mémoire du compte (processus de la page et de ses iframes), pic depuis le démarrage">Mémoire (pic)</th>
+          <th title="« hidden » pour un compte masqué : il ne marque pas ses messages comme lus">Visibilité</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <h2>Processus partagés</h2>
+    <p id="shared"></p>
+  </main>
+  <script src="diagnostics.js"></script>
+</body>
+</html>

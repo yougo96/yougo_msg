@@ -1,0 +1,54 @@
+:root {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  padding: 18px 20px;
+  background: #1d2027;
+  color: #e6e8ec;
+  font: 14px 'Segoe UI', system-ui, sans-serif;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  color: #b6bcc8;
+}
+
+input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid #3a3f4a;
+  border-radius: 8px;
+  background: #15171c;
+  color: inherit;
+  font: inherit;
+}
+
+input:focus {
+  border-color: #8b5cf6;
+  outline: none;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+button {
+  padding: 7px 14px;
+  border: 0;
+  border-radius: 8px;
+  background: #2f3440;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+button.primary {
+  background: #7c3aed;
+}

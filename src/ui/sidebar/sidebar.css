@@ -1,0 +1,276 @@
+:root {
+  color-scheme: dark;
+  --sidebar-width: 72px; /* remplacée par la valeur du process principal (SIDEBAR_WIDTH) */
+  --bg: #15171c;
+  --bar: #0f1115;
+  --line: #23262d;
+  --tile: #1d2027;
+  --tile-hover: #2a2e37;
+  --tile-active: #2f3440;
+  --text: #e6e8ec;
+  --muted-text: #8a909c;
+  --red: #e5484d;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  user-select: none;
+}
+
+#sidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: var(--sidebar-width);
+  height: 100%;
+  padding: 14px 0 10px;
+  background: var(--bar);
+  border-right: 1px solid var(--line);
+}
+
+#accounts {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 4px 0 8px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+button {
+  position: relative;
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.account {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: var(--tile);
+  transition: background 0.15s, border-radius 0.15s;
+}
+
+.account:hover {
+  background: var(--tile-hover);
+}
+
+.account:focus-visible,
+.tool:focus-visible,
+#panel-action:focus-visible {
+  outline: 2px solid var(--brand, #8b5cf6);
+  outline-offset: 2px;
+}
+
+.account.active {
+  background: var(--tile-active);
+  border-radius: 12px;
+}
+
+/* Indicateur du compte actif, collé au bord gauche */
+.account::before {
+  content: '';
+  position: absolute;
+  left: -13px;
+  width: 4px;
+  height: 0;
+  border-radius: 0 4px 4px 0;
+  background: var(--brand);
+  transition: height 0.15s;
+}
+
+.account.active::before {
+  height: 28px;
+}
+
+.account img {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  transition: opacity 0.3s, filter 0.3s;
+}
+
+.account.loading img,
+.account.loading .fallback {
+  opacity: 0.35;
+}
+
+.account.muted img {
+  filter: grayscale(0.6);
+}
+
+.fallback {
+  color: var(--brand);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.badge {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--red);
+  box-shadow: 0 0 0 2px var(--bar);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 18px;
+  text-align: center;
+}
+
+/* Non-lus sans nombre (ex. Discord sans mention) */
+.badge.dot {
+  top: -2px;
+  right: -2px;
+  min-width: 0;
+  width: 12px;
+  height: 12px;
+  padding: 0;
+}
+
+/* Problème : connexion requise, hors ligne, page plantée */
+.badge.alert {
+  background: #d9822b;
+}
+
+.account.muted .badge:not(.alert) {
+  background: #5b616e;
+}
+
+.number {
+  position: absolute;
+  bottom: -3px;
+  left: -3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--bar);
+  box-shadow: 0 0 0 1.5px #3a3f4a;
+  color: var(--text);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+}
+
+.account.dragging {
+  opacity: 0.4;
+}
+
+.account.drop-before {
+  box-shadow: 0 -3px 0 var(--brand, #8b5cf6);
+}
+
+.account.drop-after {
+  box-shadow: 0 3px 0 var(--brand, #8b5cf6);
+}
+
+#tools {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.tool {
+  width: 40px;
+  height: 36px;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--muted-text);
+}
+
+.tool:hover {
+  background: var(--tile);
+  color: var(--text);
+}
+
+.tool svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+#menu svg circle {
+  fill: currentColor;
+  stroke: none;
+}
+
+#dnd.on {
+  background: #3a1d20;
+  color: #ff8589;
+}
+
+#dnd .slash {
+  display: none;
+}
+
+#dnd.on .slash {
+  display: inline;
+}
+
+#stage {
+  display: grid;
+  flex: 1;
+  place-items: center;
+  padding: 24px;
+}
+
+#panel {
+  max-width: 420px;
+  text-align: center;
+}
+
+#panel h1 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+#panel p {
+  margin: 0 0 18px;
+  color: var(--muted-text);
+  line-height: 1.5;
+  user-select: text;
+}
+
+#panel-action {
+  display: inline-block;
+  padding: 9px 18px;
+  border-radius: 10px;
+  background: var(--tile-active);
+}
+
+#panel-action:hover {
+  background: #3a4050;
+}
