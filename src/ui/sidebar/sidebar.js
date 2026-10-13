@@ -122,6 +122,8 @@ function render(next) {
   state = next;
   document.documentElement.style.setProperty('--sidebar-width', `${state.sidebarWidth}px`);
   document.body.classList.toggle('compact', state.compact);
+  const titlebar = document.getElementById('titlebar');
+  if (titlebar) titlebar.textContent = state.accounts.find((account) => account.id === state.activeId)?.name ?? 'HP Message';
   summaryText.textContent = summaryLine();
 
   // Comptes ajoutés, retirés ou déplacés : on reconstruit la liste.

@@ -17,7 +17,8 @@
     "smoke": "node test/run-smoke.js",
     "predist": "node scripts/stamp.js",
     "dist": "electron-builder",
-    "update:electron": "npm install --save-dev --save-exact electron@latest && npm install --save-dev electron-builder@latest"
+    "update:electron": "npm install --save-dev --save-exact electron@latest && npm install --save-dev electron-builder@latest",
+    "icons": "electron scripts/icons.js"
   },
   "devDependencies": {
     "electron": "44.7.0",
@@ -39,7 +40,7 @@
     },
     "win": {
       "target": "nsis",
-      "icon": "assets/icon.png"
+      "icon": "assets/icon.ico"
     },
     "nsis": {
       "artifactName": "HP-Message-Setup-${version}.${ext}"

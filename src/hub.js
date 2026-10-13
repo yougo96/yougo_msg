@@ -7,6 +7,7 @@ const { Notifier } = require('./notifications');
 const views = require('./views');
 const autostart = require('./autostart');
 const { prompt } = require('./dialogs');
+const { TITLE_BAR_HEIGHT, titleBarOptions, pageQuery } = require('./titlebar');
 
 // Barre latérale en liste ; en dessous de COMPACT_BELOW px de large, la fenêtre la replie en colonne d'icônes :
 // la liste ne s'affiche que si la page garde au moins ~950 px.
@@ -16,7 +17,8 @@ const COMPACT_BELOW = 1200;
 const ASSETS = path.join(__dirname, '..', 'assets');
 const SIDEBAR_HTML = path.join(__dirname, 'ui', 'sidebar', 'index.html');
 const SIDEBAR_PRELOAD = path.join(__dirname, 'preload', 'sidebar.js');
-const APP_ICON = path.join(ASSETS, 'icon.png');
+// Windows : .ico à plusieurs tailles, net dans la barre de titre et la barre des tâches.
+const APP_ICON = path.join(ASSETS, process.platform === 'win32' ? 'icon.ico' : 'icon.png');
 // Une vue en erreur est masquée : la barre latérale affiche à sa place l'état et un bouton « Réessayer ».
 const HIDDEN_STATUSES = new Set(['offline', 'crashed']);
 // Après un chargement, la page met du temps à afficher ses non-lus : une hausse pendant ce délai n'est pas un nouveau message.
@@ -87,13 +89,14 @@ class Hub {
       minHeight: 480,
       title: 'HP Message',
       icon: APP_ICON,
+      ...titleBarOptions,
       backgroundColor: '#13151a',
       show: false,
       webPreferences: { preload: SIDEBAR_PRELOAD, sandbox: true, contextIsolation: true, spellcheck: false },
     });
     this.win = win;
     win.removeMenu();
-    win.loadFile(SIDEBAR_HTML);
+    win.loadFile(SIDEBAR_HTML, { query: pageQuery });
     // La barre latérale ne navigue jamais (un fichier déposé dessus la remplacerait).
     win.webContents.on('will-navigate', (event) => event.preventDefault());
     win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
@@ -167,7 +170,8 @@ class Hub {
     if (!win || win.isDestroyed()) return;
     const [width, height] = win.getContentSize();
     const sidebar = this.sidebarWidth();
-    const normal = { x: sidebar, y: 0, width: Math.max(0, width - sidebar), height };
+    // Sous Windows, la bande de titre de la barre latérale reste visible au-dessus de la page.
+    const normal = { x: sidebar, y: TITLE_BAR_HEIGHT, width: Math.max(0, width - sidebar), height: Math.max(0, height - TITLE_BAR_HEIGHT) };
     const full = { x: 0, y: 0, width, height };
     for (const [id, view] of this.views) view.setBounds(id === this.fullscreenId ? full : normal);
     if (sidebar !== this.shownSidebarWidth) {

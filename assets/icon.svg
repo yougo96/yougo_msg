@@ -1,15 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Même dessin que drawIcon() dans src/ui/sidebar/badge-art.js, qui fait foi : npm run icons régénère les PNG et l'ICO. -->
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#6366f1"/>
-      <stop offset="1" stop-color="#a855f7"/>
-    </linearGradient>
+    <radialGradient id="glow" cx="64" cy="32" r="420" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#22474e"/>
+      <stop offset="1" stop-color="#22474e" stop-opacity="0"/>
+    </radialGradient>
   </defs>
-  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
-  <rect x="236" y="196" width="196" height="172" rx="48" fill="#ddd6fe"/>
-  <path d="M368 352 L414 414 L322 362 Z" fill="#ddd6fe"/>
-  <path d="M152 112 H320 A56 56 0 0 1 376 168 V272 A56 56 0 0 1 320 328 H222 L152 390 V328 A56 56 0 0 1 96 272 V168 A56 56 0 0 1 152 112 Z" fill="#fff"/>
-  <circle cx="176" cy="220" r="20" fill="#7c3aed"/>
-  <circle cx="236" cy="220" r="20" fill="#7c3aed"/>
-  <circle cx="296" cy="220" r="20" fill="#7c3aed"/>
+  <rect width="512" height="512" fill="#13151a"/>
+  <rect width="512" height="512" fill="url(#glow)"/>
+  <rect x="24" y="24" width="464" height="464" fill="none" stroke="#ffffff" stroke-opacity="0.22" stroke-width="6"/>
+  <path d="M176 96 H416 V344 L336 272 H176 Z" fill="none" stroke="#ffffff" stroke-width="18" stroke-linejoin="miter"/>
+  <path d="M96 184 H344 V368 H168 L96 432 Z" fill="#3991ea"/>
+  <rect x="146" y="260" width="32" height="32" fill="#13151a"/>
+  <rect x="204" y="260" width="32" height="32" fill="#13151a"/>
+  <rect x="262" y="260" width="32" height="32" fill="#13151a"/>
 </svg>

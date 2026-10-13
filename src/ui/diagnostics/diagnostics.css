@@ -105,3 +105,18 @@ td small {
 .ok {
   color: #6fdc8c;
 }
+
+body.has-titlebar {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  height: 100vh;
+  padding-top: var(--titlebar-height);
+  overflow: hidden;
+}
+
+body.has-titlebar main {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}

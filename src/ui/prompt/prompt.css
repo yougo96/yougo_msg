@@ -1,5 +1,6 @@
 body {
   margin: 0;
+  overflow: hidden;
   padding: 18px 20px;
   background: var(--bg);
   color: var(--text);
@@ -61,4 +62,8 @@ button.primary {
 button:focus-visible {
   outline: 2px solid var(--accent-light);
   outline-offset: 2px;
+}
+
+body.has-titlebar {
+  padding-top: calc(var(--titlebar-height) + 18px);
 }

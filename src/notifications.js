@@ -4,7 +4,8 @@ const { Notification, nativeImage } = require('electron');
 const path = require('node:path');
 const { escapeMarkup } = require('./linux');
 
-const ICONS = path.join(__dirname, 'ui', 'sidebar', 'icons');
+// Icône de la messagerie sur une tuile sombre : lisible sur une notification claire comme sombre (npm run icons).
+const ICONS = path.join(__dirname, '..', 'assets', 'services');
 const KEEP = 100; // notifications gardées en mémoire : sans référence, leur clic est perdu
 const BURST = { count: 5, windowMs: 10e3 }; // au-delà, une notification de synthèse
 const FALLBACK_DELAY = 4000; // laisse le temps à la page de notifier elle-même

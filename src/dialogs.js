@@ -1,6 +1,7 @@
 // Petite fenêtre de saisie (Electron n'a pas d'équivalent de prompt()). Renvoie le texte, ou null si annulé.
 const { BrowserWindow, ipcMain } = require('electron');
 const path = require('node:path');
+const { TITLE_BAR_HEIGHT, titleBarOptions, pageQuery } = require('./titlebar');
 
 let current = null; // une seule à la fois
 
@@ -14,11 +15,13 @@ function prompt(parent, { title, label, value = '', placeholder = '' }) {
       parent,
       modal: true,
       width: 420,
-      height: 170,
+      height: 175 + TITLE_BAR_HEIGHT,
+      useContentSize: true,
       resizable: false,
       minimizable: false,
       maximizable: false,
       title,
+      ...titleBarOptions,
       show: false,
       backgroundColor: '#13151a',
       webPreferences: { preload: path.join(__dirname, 'preload', 'tool.js'), sandbox: true, contextIsolation: true },
@@ -33,7 +36,7 @@ function prompt(parent, { title, label, value = '', placeholder = '' }) {
         resolve(null);
       }
     });
-    win.loadFile(path.join(__dirname, 'ui', 'prompt', 'index.html'));
+    win.loadFile(path.join(__dirname, 'ui', 'prompt', 'index.html'), { query: pageQuery });
   });
 }
 

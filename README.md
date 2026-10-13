@@ -67,7 +67,7 @@ Menu ⋯ → **Diagnostic** : pour chaque compte, l'état, d'où vient le compte
 
 ## Ajouter une messagerie
 
-Une entrée dans [`src/services.js`](src/services.js) et une icône `src/ui/sidebar/icons/<id>.png`. Le minimum : `id`, `name`, `url`, `color`, `hosts` (domaines où la page peut naviguer). Par défaut, le compteur de non-lus est lu dans le titre (« (3) Service »). Les autres options (lecture de la page, favicon, fenêtres d'appel, page de connexion…) sont décrites en tête du fichier. `npm test` vérifie que l'entrée est complète.
+Une entrée dans [`src/services.js`](src/services.js) et le tracé du logo en SVG dans `assets/services/<id>.svg` : on le prend sur [Simple Icons](https://simpleicons.org) et on met la couleur de la marque dans `fill`. Ensuite, `npm run icons` produit l'icône de la barre (256 px, fond transparent) et celle des notifications. Le minimum de l'entrée : `id`, `name`, `url`, `color`, `hosts` (domaines où la page peut naviguer). Par défaut, le compteur de non-lus est lu dans le titre (« (3) Service »). Les autres options (lecture de la page, favicon, fenêtres d'appel, page de connexion…) sont décrites en tête du fichier. `npm test` vérifie que l'entrée est complète.
 
 Ajouter un service au catalogue ne le crée pas chez soi : il apparaît dans ⋯ → *Ajouter une messagerie* (ou d'office au premier lancement si `enabled` n'est pas `false`).
 
@@ -104,9 +104,17 @@ src/
   accounts.js, settings.js   comptes et réglages (écriture atomique, reprise du POC)
   tray.js, autostart.js, linux.js, context-menu.js, diagnostics.js, dialogs.js, log.js
   preload/           ponts : barre latérale, petites fenêtres, et service.js injecté dans les messageries
-  ui/                barre latérale, Diagnostic, Renommer ; fonts/ : polices de la DA de pradierh.fr (Unbounded, Lexend, licence OFL)
+  ui/                barre latérale, Diagnostic, Renommer ; theme.css (DA de pradierh.fr), titlebar.js (bande de titre Windows),
+                     fonts/ (Unbounded, Lexend, licence OFL)
+  titlebar.js        barre de titre à la DA sous Windows (options des fenêtres de l'app)
 test/                tests (node:test) et test de bout en bout (smoke)
+assets/              icône de l'app (PNG, ICO pour Windows, SVG de référence), pastille de secours ; services/ : logos des messageries (SVG, tuiles des notifications)
+scripts/             icons.js (régénère les icônes), stamp.js (date de l'Electron embarqué)
 ```
+
+## Apparence
+
+La DA reprend celle de [pradierh.fr](https://pradierh.fr) : fond sombre, bleu, angles vifs et filets fins. Les couleurs et les polices sont dans `src/ui/theme.css`. Sous Windows, la barre de titre est dessinée par l'app. L'icône est dessinée en vectoriel dans `src/ui/sidebar/badge-art.js`, avec les pastilles de la zone de notification et de la barre des tâches. Après une modification, `npm run icons` régénère les fichiers de `assets/`.
 
 ## Limites connues, à vérifier à l'usage
 

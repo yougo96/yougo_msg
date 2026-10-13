@@ -3,6 +3,7 @@
 const { BrowserWindow, app, clipboard, ipcMain, shell } = require('electron');
 const fs = require('node:fs');
 const path = require('node:path');
+const { titleBarOptions, pageQuery } = require('./titlebar');
 const views = require('./views');
 
 const MEMORY_LOG_INTERVAL = 15 * 60e3;
@@ -128,6 +129,7 @@ function openWindow(hub) {
     width: 980,
     height: 640,
     title: 'HP Message · Diagnostic',
+    ...titleBarOptions,
     backgroundColor: '#13151a',
     autoHideMenuBar: true,
     webPreferences: { preload: path.join(__dirname, 'preload', 'tool.js'), sandbox: true, contextIsolation: true },
@@ -135,7 +137,7 @@ function openWindow(hub) {
   win.removeMenu();
   win.webContents.on('will-navigate', (event) => event.preventDefault());
   win.on('closed', () => (win = null));
-  win.loadFile(path.join(__dirname, 'ui', 'diagnostics', 'index.html'));
+  win.loadFile(path.join(__dirname, 'ui', 'diagnostics', 'index.html'), { query: pageQuery });
 }
 
 function register(hub) {

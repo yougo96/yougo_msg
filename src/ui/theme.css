@@ -1,15 +1,16 @@
-/* Polices de la DA (pradierh.fr), embarquées : rien n'est chargé depuis Internet.
-   Unbounded remplace Monument Extended (titres), Lexend remplace Neo Sans (texte). Licence OFL, cf. OFL-*.txt. */
+/* Thème commun des pages de l'app (barre latérale, Renommer, Diagnostic) : DA de pradierh.fr.
+   Polices embarquées, rien n'est chargé depuis Internet : Unbounded remplace Monument Extended (titres),
+   Lexend remplace Neo Sans (texte). Licence OFL, cf. fonts/OFL-*.txt. */
 @font-face {
   font-family: 'Unbounded';
-  src: url('unbounded-latin.woff2') format('woff2');
+  src: url('fonts/unbounded-latin.woff2') format('woff2');
   font-weight: 300 700;
   font-display: swap;
 }
 
 @font-face {
   font-family: 'Lexend';
-  src: url('lexend-latin.woff2') format('woff2');
+  src: url('fonts/lexend-latin.woff2') format('woff2');
   font-weight: 300 500;
   font-display: swap;
 }
@@ -34,4 +35,23 @@
   --radius: 1px;
   --display: 'Unbounded', 'Segoe UI', system-ui, sans-serif;
   --body: 'Lexend', 'Segoe UI', system-ui, sans-serif;
+}
+
+/* Bande de titre (Windows) : posée par titlebar.js, Windows y dessine ses boutons à droite. */
+.titlebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  height: var(--titlebar-height, 0px);
+  padding: 0 150px 0 16px;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text-2);
+  font: 300 12px var(--body);
+  white-space: nowrap;
+  -webkit-app-region: drag;
 }

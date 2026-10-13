@@ -6,7 +6,7 @@ const { UnreadTracker } = require('./unread');
 const { setupSession } = require('./sessions');
 const { attachContextMenu } = require('./context-menu');
 
-const APP_ICON = path.join(__dirname, '..', 'assets', 'icon.png');
+const APP_ICON = path.join(__dirname, '..', 'assets', process.platform === 'win32' ? 'icon.ico' : 'icon.png');
 const PROBE_WORLD = 1001; // monde isolé où tournent les lectures de page du catalogue
 const PROBE_INTERVAL = 4000;
 const OFFLINE_RETRY = [5, 15, 60, 300]; // secondes, puis toutes les 5 min
@@ -65,6 +65,7 @@ function create(hub, account) {
       spellcheck: true,
     },
   });
+  view.setBackgroundColor('#13151a');
   view.setVisible(false);
   hub.win.contentView.addChildView(view);
   hub.views.set(id, view);

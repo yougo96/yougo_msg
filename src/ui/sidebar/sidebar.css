@@ -1,5 +1,5 @@
 /* Barre latérale en liste (proposition 2) ; repliée en colonne d'icônes quand la fenêtre est étroite (body.compact).
-   Couleurs et polices : ../fonts/fonts.css. */
+   Couleurs et polices : ../theme.css. */
 :root {
   --sidebar-width: 248px; /* remplacée par la valeur du process principal (hub.sidebarWidth) */
 }
@@ -513,4 +513,19 @@ button:focus-visible {
 #panel-action:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------- bande de titre (Windows) */
+
+/* Au-dessus de la page seulement : la barre latérale garde toute la hauteur, son en-tête sert de poignée. */
+.has-titlebar .titlebar {
+  left: var(--sidebar-width);
+}
+
+.has-titlebar #brand {
+  -webkit-app-region: drag;
+}
+
+.has-titlebar #stage {
+  margin-top: var(--titlebar-height);
 }

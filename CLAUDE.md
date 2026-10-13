@@ -39,7 +39,9 @@ Avant de conclure un changement : `npm test`, plus `npm run smoke` dès que le p
 - JavaScript CommonJS, sans étape de build ni TypeScript. Indentation de 2 espaces, fins de ligne LF.
 - Les modules purs, sans `require('electron')`, restent purs pour être testés : `services`, `policy`, `unread`, `accounts`, `settings`, `linux`, `log`.
 - Interface, commentaires, README et messages de commit en français (Conventional Commits : `feat:`, `fix:`, `docs:`, `chore:`).
-- Ajouter une messagerie = une entrée dans `src/services.js` + une icône `src/ui/sidebar/icons/<id>.png` ; `test/services.test.js` vérifie l'entrée. Une fonction `unread.page` est sérialisée et exécutée dans la page : elle doit être autonome et renvoyer `null` quand la page n'est pas prête.
+- Ajouter une messagerie = une entrée dans `src/services.js` + son tracé `assets/services/<id>.svg` (Simple Icons, `fill` à la couleur de la marque), puis `npm run icons`. Il produit l'icône de la barre (`src/ui/sidebar/icons/<id>.png`, 256 px, fond transparent) et la tuile des notifications (`assets/services/<id>.png`). `test/services.test.js` vérifie l'entrée et la qualité des icônes. Une fonction `unread.page` est sérialisée et exécutée dans la page : elle doit être autonome et renvoyer `null` quand la page n'est pas prête.
+- Apparence : DA de pradierh.fr, couleurs et polices dans `src/ui/theme.css`. L'icône de l'app est dessinée par `drawIcon()` dans `src/ui/sidebar/badge-art.js` : après une modification, `npm run icons` régénère `assets/icon.png`, `icon.ico` et `badge.png` (à committer), et `assets/icon.svg` reste à garder identique.
+- Sous Windows, les fenêtres de l'app n'ont pas de barre de titre native (`src/titlebar.js`). Une nouvelle fenêtre de l'app passe `titleBarOptions` et `pageQuery`, et sa page charge `../titlebar.js`. Les fenêtres d'appel des messageries gardent la barre native.
 - Hors périmètre (playbook) : mobile, boîte unifiée, serveur intermédiaire, distribution publique.
 
 ## Git
