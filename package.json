@@ -20,7 +20,8 @@
     "predist": "node scripts/stamp.js",
     "dist": "electron-builder",
     "update:electron": "npm install --save-dev --save-exact electron@latest && npm install --save-dev electron-builder@latest && npm install --save-exact electron-updater@latest",
-    "icons": "electron scripts/icons.js"
+    "icons": "electron scripts/icons.js",
+    "screenshots": "electron scripts/screenshots.js"
   },
   "dependencies": {
     "electron-updater": "6.8.9"
