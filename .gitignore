@@ -1,4 +1,22 @@
+# Dépendances et builds (npm install, npm run dist)
 node_modules/
 dist/
 out/
+
+# Généré par scripts/stamp.js avant chaque build
 src/build-info.json
+
+# Journaux
+*.log
+npm-debug.log*
+
+# Système et éditeurs
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp
+
+# Réglages locaux de Claude Code
+.claude/settings.local.json

@@ -6,12 +6,14 @@ Les versions web officielles sont affichées telles quelles, chacune avec sa pro
 
 ## Lancer
 
+**Quitter d'abord le POC s'il tourne** (clic droit sur son icône près de l'horloge → *Quitter*) : les deux partagent le même profil, et tant que le POC est ouvert, HP Message se ferme aussitôt en ouvrant la fenêtre du POC.
+
 **Version installée** : `npm run dist`, puis double-clic sur `dist\HP-Message-Setup-0.2.0.exe`. L'app n'est pas signée : à la première installation, Windows affiche « Windows a protégé votre ordinateur » → *Informations complémentaires* → *Exécuter quand même*. Elle remplace le POC (même identité) et **reprend ses connexions** : pas besoin de se reconnecter.
 
-**Version de développement** :
+**Version de développement** (Node.js 22.12 ou plus, 24 conseillé, cf. `.nvmrc`) :
 
 ```powershell
-npm install
+npm install   # une seule fois
 npm start
 ```
 
