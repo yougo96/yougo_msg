@@ -20,6 +20,7 @@ const STATUS_TEXT = {
   unresponsive: 'Ne répond plus',
   waiting: 'En attente de chargement',
   loading: 'Chargement…',
+  asleep: 'En veille',
 };
 const ALERTS = new Set(['login', 'offline', 'crashed', 'unresponsive']);
 
@@ -156,6 +157,7 @@ function render(next) {
     row.button.style.setProperty('--brand', account.color);
     row.button.classList.toggle('active', account.id === state.activeId);
     row.button.classList.toggle('loading', account.status === 'loading' || account.status === 'waiting');
+    row.button.classList.toggle('asleep', account.status === 'asleep');
     row.button.classList.toggle('muted', account.muted);
 
     row.name.textContent = account.name;

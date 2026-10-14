@@ -16,6 +16,7 @@ Avant de conclure un changement : `npm test`, plus `npm run smoke` dès que le p
 
 - **Identité = sessions de l'utilisateur.** `productName` « Yougo Msg », `build.appId` `com.yougo.msg`, `name` `yougo-msg` et `desktopName` fixent le dossier de profil, l'installation et le raccourci. Les changer fait perdre toutes les connexions, sauf reprise explicite comme celle de l'ancien nom « HP Message » (`src/legacy.js` : profil déplacé au premier lancement, ancienne entrée de démarrage retirée). Une partition s'appelle `persist:<accountId>`. Un id de compte ne change jamais : le premier compte d'une messagerie porte l'id de la messagerie (reprise du POC), les suivants `<service>-<base36>`. Une partition retirée n'est effacée qu'au démarrage suivant.
 - **Vues masquées.** On masque une vue uniquement avec `setVisible(false)`, pour que la page soit `hidden` et ne marque rien comme lu. Jamais `backgroundThrottling: false`, jamais une vue posée par-dessus une autre, toujours `focusOnNavigation: false`.
+- **Veille** (`policy.shouldSleep`, `views.sleep`). Un compte en veille a son état (`rt`, statut `asleep`) mais aucune vue dans `hub.views` : tout code qui parcourt les comptes doit le supporter. Jamais le compte affiché, ni un compte en appel ou qui joue un son. `hub.select` le réveille.
 - **Preload des messageries** (`src/preload/service.js`).
   - Il est enregistré au niveau de la session, ce qui couvre aussi les fenêtres d'appel.
   - Rien n'est posé sur `window` : le pont passe en arguments de `contextBridge.executeInMainWorld`.

@@ -1,4 +1,4 @@
-// Règles de navigation, de fenêtres et de permissions des messageries. Fonctions pures, testées dans test/.
+// Règles de navigation, de fenêtres, de permissions et de veille des messageries. Fonctions pures, testées dans test/.
 
 // `hosts` contient des suffixes de domaine : 'facebook.com' couvre www.facebook.com, pas evilfacebook.com.
 function hostMatches(hostname, hosts = []) {
@@ -84,6 +84,16 @@ function permissionAllowed(service, permission, origin, details = {}) {
   return parsed.protocol === 'https:' && hostMatches(parsed.hostname, service.hosts);
 }
 
+// Veille : un compte quitté depuis SLEEP_AFTER ferme sa page, ce qui rend sa mémoire (100 à 400 Mo). Seulement
+// s'il est réglé pour, ou s'il attend une connexion (une page de connexion ne reçoit rien). Jamais le compte
+// affiché, ni pendant un appel (fenêtre ouverte) ou un son.
+const SLEEP_AFTER = 10 * 60e3;
+
+function shouldSleep({ enabled, loggedOut, active, busy, leftAt }, now = Date.now()) {
+  if (active || busy || !(enabled || loggedOut)) return false;
+  return now - leftAt >= SLEEP_AFTER;
+}
+
 module.exports = {
   hostMatches,
   unwrapLink,
@@ -92,4 +102,6 @@ module.exports = {
   popupDecision,
   permissionAllowed,
   ALLOWED_PERMISSIONS,
+  shouldSleep,
+  SLEEP_AFTER,
 };

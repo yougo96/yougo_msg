@@ -180,6 +180,7 @@ async function start() {
   hub.scheduleDndEnd();
   views.startLoading(hub);
   views.startProbes(hub);
+  views.startSleepCheck(hub);
 
   // Linux : sans hôte de zone de notification, la fenêtre ne se cache jamais (elle serait introuvable).
   if (process.platform === 'linux') {

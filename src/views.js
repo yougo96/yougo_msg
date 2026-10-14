@@ -14,11 +14,11 @@ const CRASH_RETRY = [2, 10, 60];
 const CRASH_WINDOW = 10 * 60e3;
 const STAGGER_MAX_WAIT = 4000;
 
-// État vivant d'un compte, affiché dans la barre latérale et la fenêtre Diagnostic.
+// État vivant d'un compte, affiché dans la barre latérale et la fenêtre Diagnostic. Sans vue : compte en veille.
 function createRuntime(view) {
   const popups = new Set();
   return {
-    status: 'waiting', // waiting, loading, ready, offline, crashed, unresponsive
+    status: view ? 'waiting' : 'asleep', // waiting, loading, ready, offline, crashed, unresponsive, asleep
     unresponsive: false,
     loggedOut: false,
     unread: { count: null, dot: false, source: null },
@@ -35,14 +35,16 @@ function createRuntime(view) {
     error: null,
     stats: { page: 0, fallback: 0, suppressed: 0, lastAt: null },
     lastPageNotificationAt: 0,
-    wcIds: new Set([view.webContents.id]),
+    leftAt: Date.now(), // dernière fois que le compte a cessé d'être affiché (pour la veille)
+    wcIds: new Set(view ? [view.webContents.id] : []),
     popups,
-    webContents: () => [view.webContents, ...[...popups].map((win) => win.webContents)].filter((wc) => wc && !wc.isDestroyed()),
+    webContents: () => [view?.webContents, ...[...popups].map((win) => win.webContents)].filter((wc) => wc && !wc.isDestroyed()),
   };
 }
 
 function displayStatus(rt) {
   if (!rt) return 'waiting';
+  if (rt.status === 'asleep') return rt.loggedOut ? 'login' : 'asleep';
   if (rt.status === 'ready' && rt.unresponsive) return 'unresponsive';
   if (rt.status === 'ready' && rt.loggedOut) return 'login';
   return rt.status;
@@ -312,8 +314,9 @@ function loadNext(hub) {
   load(hub, id);
 }
 
-// Compte choisi avant son tour : on le charge tout de suite. Compte ajouté après le démarrage : idem.
+// Compte choisi avant son tour : on le charge tout de suite. Compte ajouté après le démarrage, ou en veille : idem.
 function ensureLoaded(hub, id) {
+  if (hub.rt(id)?.status === 'asleep') return wake(hub, id);
   if (hub.rt(id)?.status !== 'waiting' || !hub.loadQueue) return;
   hub.loadQueue = hub.loadQueue.filter((queued) => queued !== id);
   load(hub, id);
@@ -370,7 +373,7 @@ function destroy(hub, id) {
   const rt = hub.rt(id);
   if (rt) {
     clearTimeout(rt.retryTimer);
-    rt.tracker.reset();
+    rt.tracker?.reset();
     for (const popup of rt.popups) if (!popup.isDestroyed()) popup.destroy();
   }
   hub.views.delete(id);
@@ -378,6 +381,60 @@ function destroy(hub, id) {
   if (!view) return;
   hub.win.contentView.removeChildView(view);
   if (!view.webContents.isDestroyed()) view.webContents.close();
+}
+
+// ---------------------------------------------------------------- veille
+
+// Compte en veille : pas de vue, donc ni page ni processus. Il se réveille quand on l'ouvre.
+function createAsleep(hub, id, loggedOut = false) {
+  hub.runtime.set(id, Object.assign(createRuntime(null), { loggedOut }));
+}
+
+// Ferme la page, comme à la fermeture de l'app : cookies et stockage écrits tout de suite.
+function sleep(hub, id) {
+  const rt = hub.rt(id);
+  const ses = hub.views.get(id)?.webContents.session;
+  if (!rt || !ses) return;
+  const loggedOut = displayStatus(rt) === 'login';
+  destroy(hub, id);
+  ses.flushStorageData();
+  ses.cookies.flushStore().catch(() => {});
+  createAsleep(hub, id, loggedOut);
+  hub.log('info', `${id} : en veille${loggedOut ? ' (connexion requise)' : ''}`);
+  hub.updateIndicators();
+  hub.pushState();
+}
+
+function wake(hub, id) {
+  const account = hub.account(id);
+  if (!account || hub.rt(id)?.status !== 'asleep') return;
+  create(hub, account);
+  hub.layout();
+  hub.updateAudio(id);
+  hub.log('info', `${id} : réveil`);
+  load(hub, id);
+}
+
+function sleepIdle(hub) {
+  if (hub.quitting) return;
+  for (const account of hub.accounts) {
+    const rt = hub.rt(account.id);
+    const wc = hub.views.get(account.id)?.webContents;
+    if (!rt || !wc || wc.isDestroyed()) continue;
+    const state = {
+      enabled: account.sleep === true,
+      loggedOut: displayStatus(rt) === 'login',
+      active: account.id === hub.prefs.activeId,
+      busy: rt.popups.size > 0 || wc.isCurrentlyAudible(),
+      leftAt: rt.leftAt,
+    };
+    if (policy.shouldSleep(state)) sleep(hub, account.id);
+  }
+}
+
+// Une vérification par minute suffit : la veille compte en minutes.
+function startSleepCheck(hub) {
+  setInterval(() => sleepIdle(hub), 60e3);
 }
 
 // ---------------------------------------------------------------- lecture des pages (catalogue `unread.page`)
@@ -423,4 +480,4 @@ function retryFailed(hub) {
   }
 }
 
-module.exports = { create, destroy, displayStatus, startLoading, ensureLoaded, reload, home, repair, toggleCompat, zoom, startProbes, retryFailed, load };
+module.exports = { create, createAsleep, destroy, displayStatus, startLoading, ensureLoaded, reload, home, repair, toggleCompat, zoom, sleep, wake, sleepIdle, startProbes, startSleepCheck, retryFailed, load };

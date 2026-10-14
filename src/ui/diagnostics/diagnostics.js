@@ -9,6 +9,7 @@ const STATUS = {
   offline: ['Hors ligne', 'bad'],
   crashed: ['Plantée', 'bad'],
   unresponsive: ['Ne répond plus', 'bad'],
+  asleep: ['En veille', ''],
 };
 const SOURCE = { badge: 'pastille de la page', page: 'lecture de la page', title: 'titre', favicon: 'favicon' };
 

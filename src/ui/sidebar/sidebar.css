@@ -139,6 +139,11 @@ button:focus-visible {
   opacity: 0.35;
 }
 
+.account.asleep .tile img,
+.account.asleep .fallback {
+  opacity: 0.5;
+}
+
 .account.muted .tile img {
   filter: grayscale(0.6);
 }

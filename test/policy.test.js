@@ -1,6 +1,6 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { hostMatches, unwrapLink, navigationDecision, popupDecision, permissionAllowed, canOpenExternally } = require('../src/policy');
+const { hostMatches, unwrapLink, navigationDecision, popupDecision, permissionAllowed, canOpenExternally, shouldSleep, SLEEP_AFTER } = require('../src/policy');
 const CATALOG = require('../src/services');
 
 const service = (id) => CATALOG.find((entry) => entry.id === id);
@@ -59,4 +59,15 @@ test('permissions : liste fermée, domaines du service seulement', () => {
   assert.ok(permissionAllowed(whatsapp, 'display-capture', 'https://web.whatsapp.com'));
   assert.ok(permissionAllowed(whatsapp, 'openExternal', '', { externalURL: 'mailto:a@b.c' }));
   assert.ok(!permissionAllowed(whatsapp, 'openExternal', '', { externalURL: 'ms-settings:privacy' }));
+});
+
+test('veille : compte quitté depuis 10 min, réglé pour ou en attente de connexion', () => {
+  const now = 1e12;
+  const left = { active: false, busy: false, leftAt: now - SLEEP_AFTER };
+  assert.ok(shouldSleep({ ...left, enabled: true, loggedOut: false }, now));
+  assert.ok(shouldSleep({ ...left, enabled: false, loggedOut: true }, now));
+  assert.ok(!shouldSleep({ ...left, enabled: false, loggedOut: false }, now), 'sans réglage, une page connectée reste ouverte');
+  assert.ok(!shouldSleep({ ...left, enabled: true, loggedOut: false, leftAt: now - SLEEP_AFTER + 1000 }, now), 'quitté trop récemment');
+  assert.ok(!shouldSleep({ ...left, enabled: true, loggedOut: false, active: true }, now), 'compte affiché');
+  assert.ok(!shouldSleep({ ...left, enabled: true, loggedOut: true, busy: true }, now), 'appel ou son en cours');
 });

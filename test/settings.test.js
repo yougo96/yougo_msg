@@ -41,7 +41,7 @@ test('réglages abîmés ou farfelus : normalisés sans planter', () => {
   const settings = normalize(
     {
       version: 2,
-      accounts: [{ id: 'whatsapp', service: 'whatsapp', zoom: 99, name: '  Pro  ' }, { id: 'whatsapp', service: 'whatsapp' }, { id: '../evil', service: 'x' }, 'n/a', { id: 'oldie', service: 'icq' }],
+      accounts: [{ id: 'whatsapp', service: 'whatsapp', zoom: 99, name: '  Pro  ', sleep: true }, { id: 'whatsapp', service: 'whatsapp' }, { id: '../evil', service: 'x' }, 'n/a', { id: 'oldie', service: 'icq', sleep: 'oui' }],
       muted: 'oui',
       dnd: 'yes',
       window: { width: 'big' },
@@ -50,7 +50,7 @@ test('réglages abîmés ou farfelus : normalisés sans planter', () => {
     CATALOG,
   );
   assert.deepEqual(settings.accounts, [
-    { id: 'whatsapp', service: 'whatsapp', name: 'Pro', zoom: 5 },
+    { id: 'whatsapp', service: 'whatsapp', name: 'Pro', sleep: true, zoom: 5 },
     { id: 'oldie', service: 'icq' }, // messagerie retirée du catalogue : gardée, pas affichée
   ]);
   assert.equal(settings.dnd, false);

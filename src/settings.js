@@ -35,6 +35,7 @@ function normalizeAccount(raw) {
   const account = { id: raw.id, service: raw.service };
   if (typeof raw.name === 'string' && raw.name.trim()) account.name = raw.name.trim().slice(0, 40);
   if (raw.muted === true) account.muted = true;
+  if (raw.sleep === true) account.sleep = true;
   if (finite(raw.zoom) && raw.zoom !== 0) account.zoom = Math.max(-5, Math.min(5, raw.zoom));
   if (raw.userAgent === 'electron') account.userAgent = 'electron';
   return account;

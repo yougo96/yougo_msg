@@ -194,12 +194,17 @@ class Hub {
 
   // ---------------------------------------------------------------- comptes et vues
 
-  // Crée les vues des nouveaux comptes et détruit celles des comptes retirés.
+  // Crée les vues des nouveaux comptes et détruit celles des comptes retirés. Un compte réglé pour la veille
+  // ne se charge qu'à sa première ouverture.
   sync() {
     this.accounts = resolveAccounts(this.prefs.accounts, this.catalogById);
-    for (const account of this.accounts) if (!this.views.has(account.id)) views.create(this, account);
-    for (const id of [...this.views.keys()]) if (!this.account(id)) views.destroy(this, id);
     if (!this.account(this.prefs.activeId)) this.prefs.activeId = this.accounts[0]?.id ?? null;
+    for (const account of this.accounts) {
+      if (this.runtime.has(account.id)) continue;
+      if (account.sleep && account.id !== this.prefs.activeId) views.createAsleep(this, account.id);
+      else views.create(this, account);
+    }
+    for (const id of [...this.runtime.keys()]) if (!this.account(id)) views.destroy(this, id);
     this.layout();
     this.updateViews();
     this.pushState();
@@ -225,6 +230,8 @@ class Hub {
   select(id) {
     if (!this.account(id)) return;
     const changed = this.prefs.activeId !== id;
+    const left = changed ? this.rt(this.prefs.activeId) : null;
+    if (left) left.leftAt = Date.now();
     this.prefs.activeId = id;
     if (changed) this.save();
     views.ensureLoaded(this, id);
@@ -328,6 +335,14 @@ class Hub {
     this.updateStored(id, { muted: !account.muted });
     this.updateAudio(id);
     this.updateIndicators();
+  }
+
+  // Sans veille, le compte se recharge tout de suite pour recevoir à nouveau ses messages.
+  toggleSleep(id) {
+    const account = this.account(id);
+    if (!account) return;
+    this.updateStored(id, { sleep: !account.sleep });
+    if (account.sleep) views.wake(this, id);
   }
 
   // ---------------------------------------------------------------- ne pas déranger
@@ -521,14 +536,16 @@ class Hub {
     const index = this.accounts.indexOf(account);
     const rt = this.rt(id);
     const status = views.displayStatus(rt);
-    const statusLabel = { login: 'Connexion requise', offline: 'Hors ligne', crashed: 'Page plantée', unresponsive: 'Ne répond plus', waiting: 'En attente de chargement' }[status];
+    const statusLabel = { login: 'Connexion requise', offline: 'Hors ligne', crashed: 'Page plantée', unresponsive: 'Ne répond plus', waiting: 'En attente de chargement', asleep: 'En veille' }[status];
+    const live = this.views.has(id); // en veille, il n'y a pas de page
     Menu.buildFromTemplate([
       { label: account.name, enabled: false },
       ...(statusLabel ? [{ label: statusLabel, enabled: false }] : []),
       { type: 'separator' },
       { label: 'Notifications', type: 'checkbox', checked: !account.muted, click: () => this.toggleMuted(id) },
-      { label: 'Recharger', click: () => views.reload(this, id) },
-      { label: "Revenir à l'accueil", click: () => views.home(this, id) },
+      { label: 'Veille après 10 min (libère la mémoire, sans notifications)', type: 'checkbox', checked: Boolean(account.sleep), click: () => this.toggleSleep(id) },
+      { label: 'Recharger', enabled: live, click: () => views.reload(this, id) },
+      { label: "Revenir à l'accueil", enabled: live, click: () => views.home(this, id) },
       { type: 'separator' },
       { label: 'Renommer…', click: () => this.renameAccount(id) },
       { label: 'Monter', enabled: index > 0, click: () => this.moveAccount(id, -1) },
@@ -536,10 +553,10 @@ class Hub {
       { label: `Ajouter un autre compte ${account.service.name}`, click: () => this.addAccount(account.service.id) },
       { type: 'separator' },
       ...(account.service.googleSignIn
-        ? [{ label: 'Connexion Google : mode compatibilité', type: 'checkbox', checked: account.userAgent === 'electron', click: () => views.toggleCompat(this, id) }]
+        ? [{ label: 'Connexion Google : mode compatibilité', type: 'checkbox', enabled: live, checked: account.userAgent === 'electron', click: () => views.toggleCompat(this, id) }]
         : []),
-      { label: 'Réparer (vider le cache)', click: () => views.repair(this, id) },
-      { label: 'Outils de développement', click: () => this.views.get(id)?.webContents.openDevTools({ mode: 'detach' }) },
+      { label: 'Réparer (vider le cache)', enabled: live, click: () => views.repair(this, id) },
+      { label: 'Outils de développement', enabled: live, click: () => this.views.get(id)?.webContents.openDevTools({ mode: 'detach' }) },
       { type: 'separator' },
       { label: 'Retirer ce compte…', click: () => this.removeAccount(id) },
     ]).popup({ window: this.win });

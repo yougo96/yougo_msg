@@ -58,7 +58,7 @@ Le total des comptes non coupés s'affiche aussi dans le titre de la fenêtre, s
 
 ### Je passe d'une messagerie à l'autre instantanément
 
-Un clic, ou `Ctrl+1` … `Ctrl+9`. Les pages restent ouvertes en arrière-plan et chaque compte garde sa session : on ne se reconnecte jamais. Une messagerie masquée ne marque rien comme lu. On réordonne les comptes en les glissant.
+Un clic, ou `Ctrl+1` … `Ctrl+9`. Les pages restent ouvertes en arrière-plan (sauf les comptes mis en [veille](#mémoire-et-veille)) et chaque compte garde sa session : on ne se reconnecte jamais. Une messagerie masquée ne marque rien comme lu. On réordonne les comptes en les glissant.
 
 ### Je ne rate rien, et je fais taire le reste
 
@@ -116,7 +116,7 @@ C'est l'ancien nom de l'app, et celui du POC. Au premier lancement, Yougo Msg re
 ## Au quotidien
 
 - **Barre latérale** : un clic ouvre une messagerie, `Ctrl+1` … `Ctrl+9` aussi. On réordonne en glissant les comptes. Les indicateurs sont décrits [plus haut](#je-sais-tout-de-suite-où-lon-ma-écrit).
-- **Clic droit sur un compte** : couper les notifications de ce compte, recharger, revenir à l'accueil, renommer, ajouter un autre compte du même service, réparer (vider le cache), retirer.
+- **Clic droit sur un compte** : couper les notifications de ce compte, le mettre en [veille](#mémoire-et-veille), recharger, revenir à l'accueil, renommer, ajouter un autre compte du même service, réparer (vider le cache), retirer.
 - **Ne pas déranger** (en bas de la barre) : un clic l'active ou le coupe, clic droit pour une durée (1 h, jusqu'à demain 8 h).
 - **⋯** : mise à jour, ajouter une messagerie (dont Telegram et LinkedIn), lancer au démarrage, diagnostic, journaux, quitter.
 - **Fermer la fenêtre ne quitte pas** : Yougo Msg reste près de l'horloge pour continuer à recevoir les messages. Pour quitter : clic droit sur l'icône près de l'horloge, ou menu ⋯.
@@ -125,6 +125,12 @@ C'est l'ancien nom de l'app, et celui du POC. Au premier lancement, Yougo Msg re
 ### Notifications
 
 Elles portent le nom du compte (« WhatsApp 2 · Marie ») et un clic ouvre la bonne conversation. Un compte coupé, ou *Ne pas déranger*, ne notifie plus et sa page se tait tant qu'elle n'est pas affichée (un appel en cours n'est pas coupé). Une messagerie qui ne notifie pas elle-même (Discord par défaut, par exemple) déclenche une notification « Nouveau message » quand son compteur monte (pour Discord : seulement les mentions et les messages privés).
+
+### Mémoire et veille
+
+Chaque messagerie ouverte est une vraie page web qui garde sa mémoire : de 100 à 400 Mo une fois connectée (Google Chat et Discord en tête), soit 2 à 3 Go pour les sept. Pour un compte qu'on peut consulter de temps en temps : clic droit → **Veille après 10 min**. Dix minutes après qu'on l'a quitté, sa page se ferme et rend toute sa mémoire ; elle se recharge en quelques secondes quand on rouvre le compte. En veille, le compte ne reçoit ni notifications ni compteur de non-lus (« En veille » sous son nom). Il n'est pas chargé au démarrage, sauf s'il est affiché. Jamais le compte affiché ni un compte en appel.
+
+Un compte resté sur sa page de connexion se met en veille de lui-même au bout de 10 min, puisqu'il ne peut rien recevoir. La fenêtre Diagnostic donne la mémoire de chaque compte, de quoi choisir lesquels mettre en veille.
 
 ### Raccourcis
 
@@ -186,7 +192,7 @@ npm start
 ### Tests
 
 - `npm test` : règles pures (compteurs, navigation, permissions, réglages, catalogue).
-- `npm run smoke` : lance la vraie app avec un **profil temporaire** (jamais le vôtre) sur les vraies pages des messageries, déconnectées. Il vérifie l'interception des notifications et le clic rejoué, la passkey silencieuse, la visibilité des pages masquées, les compteurs, la navigation, les permissions et la reprise après panne. Il fait aussi tourner electron-updater contre un serveur local qui annonce une version 99.0.0 : téléchargement, notification, pastille, puis *Redémarrer*, qui doit fermer les pages avant l'installeur (simulé) et terminer le processus vite.
+- `npm run smoke` : lance la vraie app avec un **profil temporaire** (jamais le vôtre) sur les vraies pages des messageries, déconnectées. Il vérifie l'interception des notifications et le clic rejoué, la passkey silencieuse, la visibilité des pages masquées, les compteurs, la navigation, les permissions, la reprise après panne, et la veille (page et processus fermés, puis réveil). Il fait aussi tourner electron-updater contre un serveur local qui annonce une version 99.0.0 : téléchargement, notification, pastille, puis *Redémarrer*, qui doit fermer les pages avant l'installeur (simulé) et terminer le processus vite.
 
 ### Ajouter une messagerie
 
@@ -233,7 +239,7 @@ src/
   sessions.js        session d'un compte : permissions, partage d'écran, correcteur
   notifications.js   notifications (nom du compte, clic, rafales, « Nouveau message »)
   unread.js          compteur de non-lus d'un compte (titre, page, favicon, pastille)
-  policy.js          règles de navigation, de fenêtres et de permissions
+  policy.js          règles de navigation, de fenêtres, de permissions et de veille
   accounts.js, settings.js   comptes et réglages (écriture atomique, reprise du POC)
   legacy.js          reprise de l'ancien nom, HP Message (profil, lancement au démarrage)
   updates.js         mises à jour depuis les releases GitHub (electron-updater)

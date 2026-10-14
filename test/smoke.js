@@ -20,6 +20,7 @@ shell.openExternal = async (url) => void opened.push(url);
 const { getHub } = require('../src/main.js');
 const views = require('../src/views.js');
 const updates = require('../src/updates.js');
+const { SLEEP_AFTER } = require('../src/policy.js');
 
 const results = [];
 const check = (name, ok, detail = '') => {
@@ -194,6 +195,27 @@ async function run() {
     activeId: hub.prefs.activeId,
     views: ids.map((id) => `${id}:${hub.views.get(id).getVisible?.()}:${views.displayStatus(hub.rt(id))}:${hub.rt(id).popups.size}`),
   });
+
+  // Veille : un compte réglé pour, ou en attente de connexion, ferme sa page (et son processus) 10 min après
+  // qu'on l'a quitté ; il se recharge quand on le rouvre. Messenger n'a pas d'URL de connexion : il est « prêt ».
+  const leftLongAgo = Date.now() - SLEEP_AFTER;
+  const asleepPids = ['messenger', 'instagram'].map((id) => hub.views.get(id).webContents.getOSProcessId());
+  hub.toggleSleep('messenger');
+  for (const id of ['messenger', 'instagram', 'whatsapp']) hub.rt(id).leftAt = leftLongAgo;
+  views.sleepIdle(hub);
+  const gone = await waitFor(() => !app.getAppMetrics().some((metric) => asleepPids.includes(metric.pid)), 10000);
+  const states = Object.fromEntries(ids.map((id) => [id, hub.snapshot().accounts.find((account) => account.id === id).status]));
+  check(
+    'veille : réglée ou connexion requise -> page et processus fermés, les autres restent',
+    gone && !hub.views.has('messenger') && !hub.views.has('instagram') && hub.views.has('whatsapp') && states.messenger === 'asleep' && states.instagram === 'login',
+    states,
+  );
+  hub.select('messenger');
+  const woken = await waitFor(() => views.displayStatus(hub.rt('messenger')) === 'ready', 30000);
+  const awake = await page(hub, 'messenger', '({ visibility: document.visibilityState, shim: !/\\[native code\\]/.test(Function.prototype.toString.call(Notification)) })');
+  check('veille : réveil à l’ouverture du compte, page visible et préchargement en place', woken && awake.visibility === 'visible' && awake.shim, awake);
+  hub.toggleSleep('messenger');
+  hub.select(ids[3]);
 
   // Mise à jour : la vraie mécanique d'electron-updater, contre un serveur local qui annonce une version 99.0.0
   // (faux installeur, jamais lancé). Le cache de téléchargement est dans le profil de test (run-smoke.js).
