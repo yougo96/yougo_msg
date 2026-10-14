@@ -25,5 +25,11 @@ test('un tag vx.y.z déclenche la release', () => {
   const workflow = fs.readFileSync(path.join(ROOT, '.github', 'workflows', 'release.yml'), 'utf8');
   assert.match(workflow, /tags: \['v\*'\]/);
   assert.match(workflow, /--publish always/);
+  assert.match(workflow, /rpmbuild/);
   assert.match(fs.readFileSync(path.join(ROOT, '.npmrc'), 'utf8'), /^message = "chore: version %s"$/m);
+});
+
+test('Linux : chaque format installé trouve sa mise à jour dans la release', () => {
+  // electron-updater cherche le même format que celui installé : un format retiré laisserait ses apps sans mise à jour.
+  assert.deepEqual(pkg.build.linux.target, ['deb', 'rpm', 'AppImage']);
 });

@@ -1,5 +1,5 @@
 # Publier une version : `npm version patch` (ou minor), puis `git push --follow-tags`. Le tag vx.y.z construit
-# l'installeur Windows, le .deb et l'AppImage, et les publie dans une release GitHub : les apps installées la
+# l'installeur Windows, le .deb, le .rpm et l'AppImage, et les publie dans une release GitHub : les apps installées la
 # trouvent seules (src/updates.js).
 name: Release
 
@@ -48,6 +48,9 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      # Le .rpm (Fedora) se construit avec rpmbuild.
+      - if: runner.os == 'Linux'
+        run: command -v rpmbuild || (sudo apt-get update && sudo apt-get install -y rpm)
       - run: npm test
       - run: npm run dist -- --publish always
         env:

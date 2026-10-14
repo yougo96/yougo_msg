@@ -13,7 +13,7 @@ const ICON = path.join(__dirname, '..', 'assets', 'icon.png');
 
 let hub = null;
 let updater = null;
-let deb = false;
+let systemPackage = false; // .deb ou .rpm
 let timer = null;
 let manual = false; // vérification demandée depuis le menu : on en donne le résultat
 let notified = null;
@@ -49,11 +49,12 @@ function init(hubInstance) {
 // Branche un updater d'electron-updater (celui de l'app, ou celui du smoke test, servi en local).
 function start(instance, firstCheck = FIRST_CHECK) {
   updater = instance;
-  // Un .deb s'installe avec le mot de passe administrateur : jamais par surprise en quittant (ni à la
-  // fermeture de session), seulement sur « Redémarrer ».
-  deb = updater instanceof require('electron-updater').DebUpdater;
+  // Un .deb ou un .rpm s'installe avec le mot de passe administrateur : jamais par surprise en quittant (ni à
+  // la fermeture de session), seulement sur « Redémarrer ».
+  const { DebUpdater, RpmUpdater } = require('electron-updater');
+  systemPackage = updater instanceof DebUpdater || updater instanceof RpmUpdater;
   updater.autoDownload = true;
-  updater.autoInstallOnAppQuit = !deb;
+  updater.autoInstallOnAppQuit = !systemPackage;
   updater.disableWebInstaller = true; // installeur complet (nsis), pas de « web installer »
   // electron-updater envoie un identifiant tiré au hasard et gardé sur la machine : on le remplace.
   updater.requestHeaders = { 'x-user-staging-id': 'yougo-msg' };
@@ -103,7 +104,7 @@ function check(fromMenu) {
   if (!updater || hub.quitting || ['checking', 'downloading', 'ready'].includes(state.status)) return;
   manual = fromMenu;
   updater.checkForUpdates().then(
-    // null : format sans mise à jour automatique (Linux hors .deb et AppImage).
+    // null : format sans mise à jour automatique (Linux hors .deb, .rpm et AppImage).
     (result) => result === null && set({ status: 'off', reason: 'format sans mise à jour automatique' }),
     () => {}, // l'échec arrive aussi par l'événement « error »
   );
@@ -141,9 +142,9 @@ async function restart() {
   hub.quitting = true;
   hub.win?.hide();
   await hub.shutdown();
-  // Windows : l'installeur relance l'app. AppImage : electron-updater lance la nouvelle. .deb : à nous.
-  const installed = updater.install(true, !deb);
-  if (deb || !installed) relaunch(); // échec (ex. mot de passe refusé) : l'ancienne version redémarre
+  // Windows : l'installeur relance l'app. AppImage : electron-updater lance la nouvelle. .deb, .rpm : à nous.
+  const installed = updater.install(true, !systemPackage);
+  if (systemPackage || !installed) relaunch(); // échec (ex. mot de passe refusé) : l'ancienne version redémarre
   app.quit();
 }
 

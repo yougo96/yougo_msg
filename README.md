@@ -76,13 +76,15 @@ Fenêtre étroite (moins de 1200 px) : la barre devient une colonne d'icônes.
 
 Dans les [releases](https://github.com/yougo96/yougo_msg/releases) :
 
-- **`.deb`** (conseillé) : `sudo apt install ./Yougo-Msg-<version>.deb`
+- **`.deb`** (Ubuntu, Debian ; conseillé) : `sudo apt install ./Yougo-Msg-<version>.deb`
+- **`.rpm`** (Fedora ; conseillé) : `sudo dnf install ./Yougo-Msg-<version>.rpm`
 - **AppImage** : `chmod +x`, puis lancer. Il faut `libfuse2` (`libfuse2t64` sur Ubuntu 24.04).
 
 Bon à savoir :
 
-- Sur Ubuntu 24.04+, l'AppImage tourne sans le bac à sable de Chromium. Préférer le `.deb`.
+- Sur Ubuntu 24.04+, l'AppImage tourne sans le bac à sable de Chromium. Préférer le `.deb` ou le `.rpm`.
 - GNOME : l'icône près de l'horloge demande l'extension AppIndicator (déjà là sur Ubuntu). Sans elle, fermer la fenêtre la réduit.
+  Sur Fedora : `sudo dnf install gnome-shell-extension-appindicator`, se reconnecter, puis `gnome-extensions enable appindicatorsupport@rgcjonas.gmail.com`.
 - Les cookies ne sont pas chiffrés : pas besoin du trousseau. La protection, c'est le chiffrement du disque.
 - Correcteur : dictionnaires FR et EN téléchargés une fois depuis Google. Aucun texte envoyé.
 
@@ -138,7 +140,7 @@ Le Diagnostic montre la mémoire de chaque compte.
 - Automatiques : au démarrage, puis toutes les 6 h.
 - Prête ? Une pastille sur **⋯**, puis *Redémarrer pour passer à la version x.y.z*.
 - Sans ce clic, elle s'installe en quittant (Windows, AppImage).
-- `.deb` : mot de passe administrateur, seulement sur *Redémarrer*.
+- `.deb`, `.rpm` : mot de passe administrateur, seulement sur *Redémarrer*.
 - Depuis la 0.2.0 : installer une fois à la main.
 
 ### Connexion Google refusée ?
@@ -240,6 +242,6 @@ src/
 test/                tests et smoke test
 assets/              icônes
 docs/                images du README
-scripts/             icônes et captures
+scripts/             icônes, captures, script de désinstallation du .rpm
 .github/workflows/   release.yml
 ```

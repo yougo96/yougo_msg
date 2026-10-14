@@ -60,6 +60,7 @@
     "linux": {
       "target": [
         "deb",
+        "rpm",
         "AppImage"
       ],
       "icon": "assets/icon.png",
@@ -67,6 +68,9 @@
       "maintainer": "pradier-h",
       "syncDesktopName": true,
       "artifactName": "Yougo-Msg-${version}.${ext}"
+    },
+    "rpm": {
+      "afterRemove": "scripts/rpm-after-remove.tpl"
     }
   }
 }

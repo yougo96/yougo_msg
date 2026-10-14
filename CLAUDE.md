@@ -7,7 +7,7 @@ App de bureau personnelle (Windows 11 + Linux, Electron 44) qui affiche les vers
 - `npm start` : lance l'app sur le **vrai profil** de l'utilisateur (ses sessions). Ne jamais l'utiliser pour tester.
 - `npm test` : tests unitaires (`node:test`) des modules sans Electron.
 - `npm run smoke` : lance la vraie app avec un profil temporaire, sur les vraies pages déconnectées, puis vérifie qu'elle se ferme vite. Environ 2 min, réseau requis.
-- `npm run dist` : installeur Windows (ou `.deb` + AppImage sous Linux), dans `dist/`.
+- `npm run dist` : installeur Windows (ou `.deb` + `.rpm` + AppImage sous Linux ; le `.rpm` demande `rpmbuild`), dans `dist/`.
 - `npm version patch|minor` : commit « chore: version x.y.z » et tag `vx.y.z`. Le tag poussé lance `.github/workflows/release.yml`, qui construit Windows et Linux et publie la release GitHub dont les apps installées se mettent à jour. Publier est la décision de l'utilisateur : ne pas lancer `npm version` sans qu'il le demande.
 
 Avant de conclure un changement : `npm test`, plus `npm run smoke` dès que le process principal, un preload ou une page est touché.
@@ -25,7 +25,7 @@ Avant de conclure un changement : `npm test`, plus `npm run smoke` dès que le p
 - **Piège Windows du processus fantôme.** Trois mécanismes sont à garder ensemble : le neutraliseur de passkey silencieuse (get et create conditionnels), la fermeture de toutes les pages avant de quitter (`closeAllPages`, via `hub.shutdown()`) et le garde-fou externe de `main.js`.
 - **Mises à jour** (`src/updates.js`, electron-updater, releases du dépôt public `yougo96/yougo_msg`).
   - Actives seulement dans la version installée, jamais avec `YOUGO_MSG_USER_DATA` : un test ne doit jamais lancer un installeur, il remplacerait l'app installée de l'utilisateur.
-  - « Redémarrer » ferme les pages (`hub.shutdown()`) avant `install()` : l'installeur NSIS tue l'app si elle tarde, et des cookies pas encore écrits seraient perdus. Un `.deb` (mot de passe administrateur) ne s'installe jamais en quittant.
+  - « Redémarrer » ferme les pages (`hub.shutdown()`) avant `install()` : l'installeur NSIS tue l'app si elle tarde, et des cookies pas encore écrits seraient perdus. Un `.deb` ou un `.rpm` (mot de passe administrateur) ne s'installe jamais en quittant.
   - Le tag `vx.y.z` égale la version de `package.json` ; `electron-updater` reste dans `dependencies` (sinon il n'est pas embarqué) et `build.publish` pointe sur le dépôt (`test/release.test.js`).
 - **IPC.** Chaque canal vérifie son émetteur : la barre latérale pour `hub:*`, le compte et l'origine de la frame pour `service:*`. `service:config` est synchrone et doit toujours renseigner `returnValue`.
 - **Cookies non chiffrés** (fusible `enableCookieEncryption: false`), ce qui évite toute dépendance au trousseau Linux. Ne pas activer ce fusible : la bascule est à sens unique et déconnecterait tous les comptes.
