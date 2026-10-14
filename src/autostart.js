@@ -2,7 +2,6 @@
 // L'app démarre alors avec --hidden, directement dans la zone de notification.
 const { app } = require('electron');
 const linux = require('./linux');
-const legacy = require('./legacy');
 
 // Nom de l'entrée dans le registre : l'AppUserModelId.
 const NAME = 'com.yougo.msg';
@@ -24,12 +23,6 @@ function isEnabled() {
   return settings.executableWillLaunchAtLogin ?? settings.openAtLogin;
 }
 
-// Entrée de l'ancien nom (HP Message, cf. legacy.js) : elle lancerait l'ancienne app au démarrage.
-function removeLegacy() {
-  if (process.platform === 'linux') linux.removeIntegration(legacy.ID);
-  else app.setLoginItemSettings({ openAtLogin: false, name: legacy.ID });
-}
-
 function setEnabled(enabled) {
   if (!supported()) return;
   if (process.platform === 'linux') linux.setAutostart(enabled, launchArgv());
@@ -43,7 +36,6 @@ function init(prefs, save, log) {
   if (!supported() || process.env.YOUGO_MSG_USER_DATA) return;
   try {
     if (!prefs.autostartInitialized) {
-      removeLegacy();
       setEnabled(true);
       prefs.autostartInitialized = true;
       save();

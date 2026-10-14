@@ -54,9 +54,9 @@ function desktopEntry({ name, comment, argv, icon, extra = [] }) {
 
 const configHome = () => process.env.XDG_CONFIG_HOME || path.join(os.homedir(), '.config');
 const dataHome = () => process.env.XDG_DATA_HOME || path.join(os.homedir(), '.local', 'share');
-const autostartFile = (id = DESKTOP_ID) => path.join(configHome(), 'autostart', `${id}.desktop`);
-const launcherFile = (id = DESKTOP_ID) => path.join(dataHome(), 'applications', `${id}.desktop`);
-const iconFile = (id = DESKTOP_ID) => path.join(dataHome(), 'icons', 'hicolor', '512x512', 'apps', `${id}.png`);
+const autostartFile = () => path.join(configHome(), 'autostart', `${DESKTOP_ID}.desktop`);
+const launcherFile = () => path.join(dataHome(), 'applications', `${DESKTOP_ID}.desktop`);
+const iconFile = () => path.join(dataHome(), 'icons', 'hicolor', '512x512', 'apps', `${DESKTOP_ID}.png`);
 
 function getAutostart() {
   try {
@@ -102,12 +102,7 @@ function integrateAppImage(appImagePath, iconSource) {
   if (!fs.existsSync(file) || fs.readFileSync(file, 'utf8') !== text) fs.writeFileSync(file, text);
 }
 
-// Fichiers d'un ancien nom de l'app (cf. legacy.js) : démarrage, raccourci et icône de l'AppImage.
-function removeIntegration(id) {
-  for (const file of [autostartFile(id), launcherFile(id), iconFile(id)]) fs.rmSync(file, { force: true });
-}
-
 // Les serveurs de notifications GNOME et KDE interprètent un balisage dans le texte.
 const escapeMarkup = (text) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-module.exports = { DESKTOP_ID, trayHostAvailable, waitForTrayHost, execArg, desktopEntry, getAutostart, setAutostart, integrateAppImage, removeIntegration, escapeMarkup, autostartFile };
+module.exports = { DESKTOP_ID, trayHostAvailable, waitForTrayHost, execArg, desktopEntry, getAutostart, setAutostart, integrateAppImage, escapeMarkup, autostartFile };

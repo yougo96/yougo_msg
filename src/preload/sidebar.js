@@ -6,7 +6,6 @@ contextBridge.exposeInMainWorld('hub', {
   select: (id) => ipcRenderer.send('hub:select', String(id)),
   accountMenu: (id) => ipcRenderer.send('hub:account-menu', String(id)),
   appMenu: () => ipcRenderer.send('hub:app-menu'),
-  toggleDnd: () => ipcRenderer.send('hub:toggle-dnd'),
   dndMenu: () => ipcRenderer.send('hub:dnd-menu'),
   retry: (id) => ipcRenderer.send('hub:retry', String(id)),
   // Glisser-déposer : place le compte `id` avant ou après `targetId`.

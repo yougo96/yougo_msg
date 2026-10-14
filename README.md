@@ -92,14 +92,6 @@ Bon à savoir :
 
 Se connecter à chaque messagerie. Les sessions sont gardées.
 
-### En venant de HP Message
-
-C'est l'ancien nom de l'app.
-
-1. Quitter HP Message : clic droit sur son icône près de l'horloge → *Quitter*.
-2. Lancer Yougo Msg. Il reprend les connexions, les comptes et les réglages.
-3. Désinstaller HP Message.
-
 ## Au quotidien
 
 | Je veux… | Je fais… |
@@ -107,7 +99,7 @@ C'est l'ancien nom de l'app.
 | Changer de compte | Clic, ou `Ctrl+1` … `Ctrl+9` |
 | Réordonner | Glisser le compte |
 | Couper, renommer, recharger, retirer un compte | Clic droit dessus |
-| Faire taire tout le monde | *Ne pas déranger*, en bas (clic droit : choisir la durée) |
+| Faire taire tout le monde | *Ne pas déranger*, en bas, puis choisir la durée |
 | Ajouter une messagerie, voir le diagnostic | Menu ⋯ |
 | Quitter | Clic droit sur l'icône près de l'horloge → *Quitter* |
 

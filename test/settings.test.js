@@ -16,27 +16,6 @@ test('premier lancement : un compte par messagerie activée, id = id de la messa
   );
 });
 
-test('reprise des réglages du POC : mêmes ids de compte (donc mêmes sessions)', () => {
-  const poc = {
-    activeId: 'whatsapp-mgk3x1',
-    doNotDisturb: true,
-    muted: ['discord', 'whatsapp-mgk3x1'],
-    extraAccounts: [{ id: 'whatsapp-mgk3x1', service: 'whatsapp' }],
-    trayHintShown: true,
-  };
-  const settings = normalize(poc, CATALOG);
-  assert.deepEqual(
-    settings.accounts.map((account) => account.id),
-    ['messenger', 'whatsapp', 'whatsapp-mgk3x1', 'instagram', 'snapchat', 'googlechat', 'googlemessages', 'discord'],
-  );
-  assert.equal(settings.accounts.find((account) => account.id === 'discord').muted, true);
-  assert.equal(settings.accounts.find((account) => account.id === 'whatsapp-mgk3x1').muted, true);
-  assert.equal(settings.activeId, 'whatsapp-mgk3x1');
-  assert.equal(settings.dnd, true);
-  assert.equal(settings.dndUntil, null);
-  assert.equal(settings.trayHintShown, true);
-});
-
 test('réglages abîmés ou farfelus : normalisés sans planter', () => {
   const settings = normalize(
     {

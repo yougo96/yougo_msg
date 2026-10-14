@@ -1,6 +1,6 @@
 // Comptes : une instance d'une messagerie du catalogue, avec sa propre session (partition persist:<id>).
 // L'id d'un compte ne change jamais : il nomme sa partition, donc ses connexions. Le premier compte d'une
-// messagerie porte l'id de la messagerie (compatibilité avec les sessions du POC).
+// messagerie porte l'id de la messagerie.
 
 const ID_PATTERN = /^[a-z0-9][a-z0-9-]{0,63}$/;
 

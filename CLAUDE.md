@@ -14,7 +14,7 @@ Avant de conclure un changement : `npm test`, plus `npm run smoke` dès que le p
 
 ## Invariants (à ne pas casser)
 
-- **Identité = sessions de l'utilisateur.** `productName` « Yougo Msg », `build.appId` `com.yougo.msg`, `name` `yougo-msg` et `desktopName` fixent le dossier de profil, l'installation et le raccourci. Les changer fait perdre toutes les connexions, sauf reprise explicite comme celle de l'ancien nom « HP Message » (`src/legacy.js` : profil déplacé au premier lancement, ancienne entrée de démarrage retirée). Une partition s'appelle `persist:<accountId>`. Un id de compte ne change jamais : le premier compte d'une messagerie porte l'id de la messagerie (reprise du POC), les suivants `<service>-<base36>`. Une partition retirée n'est effacée qu'au démarrage suivant.
+- **Identité = sessions de l'utilisateur.** `productName` « Yougo Msg », `build.appId` `com.yougo.msg`, `name` `yougo-msg` et `desktopName` fixent le dossier de profil, l'installation et le raccourci. Les changer fait perdre toutes les connexions. Une partition s'appelle `persist:<accountId>`. Un id de compte ne change jamais : le premier compte d'une messagerie porte l'id de la messagerie, les suivants `<service>-<base36>`. Une partition retirée n'est effacée qu'au démarrage suivant.
 - **Vues masquées.** On masque une vue uniquement avec `setVisible(false)`, pour que la page soit `hidden` et ne marque rien comme lu. Jamais `backgroundThrottling: false`, jamais une vue posée par-dessus une autre, toujours `focusOnNavigation: false`.
 - **Veille** (`policy.shouldSleep`, `views.sleep`). Un compte en veille a son état (`rt`, statut `asleep`) mais aucune vue dans `hub.views` : tout code qui parcourt les comptes doit le supporter. Jamais le compte affiché, ni un compte en appel ou qui joue un son. `hub.select` le réveille.
 - **Preload des messageries** (`src/preload/service.js`).
@@ -33,7 +33,7 @@ Avant de conclure un changement : `npm test`, plus `npm run smoke` dès que le p
 
 ## Tests et expériences
 
-- Toujours un profil isolé : variable `YOUGO_MSG_USER_DATA`, ou `app.setPath('userData', …)` avant `ready` dans un script. Ne jamais toucher à `%APPDATA%\Yougo Msg` ni à `~/.config/Yougo Msg`, ni à l'ancien dossier `HP Message` (il peut encore porter les sessions).
+- Toujours un profil isolé : variable `YOUGO_MSG_USER_DATA`, ou `app.setPath('userData', …)` avant `ready` dans un script. Ne jamais toucher à `%APPDATA%\Yougo Msg` ni à `~/.config/Yougo Msg`.
 - Ne pas afficher de vraies notifications en développement : depuis Electron 41, la première notification crée un raccourci `Electron.lnk` dans le menu Démarrer. Le smoke test remplace `notifier.show` et `notifier.info`.
 - Le smoke test fait tourner le vrai electron-updater contre un serveur local, avec `install()` remplacé et le cache des téléchargements dans le profil temporaire (`LOCALAPPDATA`, `XDG_CACHE_HOME`). Il se termine par « Redémarrer pour mettre à jour ».
 - Ne jamais appeler `app.setLoginItemSettings` en test. `autostart.init` ne fait rien quand `YOUGO_MSG_USER_DATA` est défini.
@@ -44,7 +44,7 @@ Avant de conclure un changement : `npm test`, plus `npm run smoke` dès que le p
 ## Code
 
 - JavaScript CommonJS, sans étape de build ni TypeScript. Indentation de 2 espaces, fins de ligne LF.
-- Les modules purs, sans `require('electron')`, restent purs pour être testés : `services`, `policy`, `unread`, `accounts`, `settings`, `legacy`, `linux`, `log`.
+- Les modules purs, sans `require('electron')`, restent purs pour être testés : `services`, `policy`, `unread`, `accounts`, `settings`, `linux`, `log`.
 - Interface, commentaires, README et messages de commit en français (Conventional Commits : `feat:`, `fix:`, `docs:`, `chore:`).
 - Ajouter une messagerie = une entrée dans `src/services.js` + son tracé `assets/services/<id>.svg` (Simple Icons, `fill` à la couleur de la marque), puis `npm run icons`. Il produit l'icône de la barre (`src/ui/sidebar/icons/<id>.png`, 256 px, fond transparent) et la tuile des notifications (`assets/services/<id>.png`). `test/services.test.js` vérifie l'entrée et la qualité des icônes. Une fonction `unread.page` est sérialisée et exécutée dans la page : elle doit être autonome et renvoyer `null` quand la page n'est pas prête.
 - Apparence : DA de pradierh.fr, couleurs et polices dans `src/ui/theme.css`. L'icône de l'app est dessinée par `drawIcon()` dans `src/ui/sidebar/badge-art.js` : après une modification, `npm run icons` régénère `assets/icon.png`, `icon.ico` et `badge.png` (à committer), et `assets/icon.svg` reste à garder identique. Après un changement visible de la barre latérale ou de l'icône, `npm run screenshots` régénère les images du README (`docs/`, à committer) : vraie barre latérale, comptes et page de démonstration.

@@ -1,5 +1,5 @@
 // Point d'entrée : réglages de démarrage, instance unique, branchements, fermeture propre.
-const { app, dialog, ipcMain, powerMonitor } = require('electron');
+const { app, ipcMain, powerMonitor } = require('electron');
 const { spawn } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -14,18 +14,12 @@ const views = require('./views');
 const autostart = require('./autostart');
 const diagnostics = require('./diagnostics');
 const linux = require('./linux');
-const legacy = require('./legacy');
 const updates = require('./updates');
 
 const APP_ID = 'com.yougo.msg'; // = build.appId dans package.json (vérifié par test/services.test.js)
 
 // Profil séparé pour les tests : un test ne doit jamais toucher au vrai profil (sessions des messageries).
 if (process.env.YOUGO_MSG_USER_DATA) app.setPath('userData', path.resolve(process.env.YOUGO_MSG_USER_DATA));
-
-// Premier lancement après le renommage : on reprend le profil de HP Message, donc ses connexions.
-const legacyProfile = process.env.YOUGO_MSG_USER_DATA
-  ? 'none'
-  : legacy.adoptProfile(path.join(app.getPath('appData'), legacy.PRODUCT_NAME), app.getPath('userData'));
 
 if (process.platform === 'linux') {
   // Les cookies ne sont pas chiffrés (fusible cookieEncryption désactivé) : les sessions ne dépendent pas du
@@ -103,7 +97,6 @@ function registerIpc() {
   onSidebar('hub:select', (id) => hub.select(id));
   onSidebar('hub:account-menu', (id) => hub.accountMenu(id));
   onSidebar('hub:app-menu', () => hub.appMenu());
-  onSidebar('hub:toggle-dnd', () => hub.setDnd(hub.dndActive() ? 'off' : 'on'));
   onSidebar('hub:dnd-menu', () => hub.dndMenu());
   onSidebar('hub:retry', (id) => views.reload(hub, id));
   onSidebar('hub:place', (id, targetId, position) => hub.placeAccount(id, targetId, position === 'after'));
@@ -156,11 +149,6 @@ async function start() {
   log('info', `démarrage ${app.getVersion()} (Electron ${process.versions.electron}, ${process.platform})${app.isPackaged ? '' : ' [dev]'}`);
 
   const store = new SettingsStore(path.join(userData, 'settings.json'), CATALOG, log);
-  if (legacyProfile === 'moved') {
-    log('info', 'profil de HP Message repris');
-    // Son entrée de démarrage lançait l'ancienne app : la version installée la remplacera par la sienne.
-    store.data.autostartInitialized = false;
-  }
   deletePendingPartitions(store);
   hub = new Hub({ catalog: CATALOG, store, log, userAgents });
   registerIpc();
@@ -207,18 +195,7 @@ async function start() {
   for (const event of ['resume', 'unlock-screen']) powerMonitor.on(event, () => setTimeout(() => views.retryFailed(hub), 5000));
 }
 
-if (legacyProfile === 'busy') {
-  // Rien ne démarre : le profil reste à reprendre au prochain lancement.
-  app.whenReady().then(() => {
-    dialog.showMessageBoxSync({
-      type: 'info',
-      title: 'Yougo Msg',
-      message: 'HP Message est encore ouvert',
-      detail: 'Yougo Msg reprend ses connexions au premier lancement. Quittez HP Message (clic droit sur son icône près de l’horloge → Quitter), puis relancez Yougo Msg.',
-    });
-    app.quit();
-  });
-} else if (!app.requestSingleInstanceLock()) {
+if (!app.requestSingleInstanceLock()) {
   app.quit();
 } else {
   // Deuxième lancement (raccourci, menu des applications) : on montre la fenêtre déjà ouverte.

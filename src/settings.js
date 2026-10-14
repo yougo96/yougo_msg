@@ -1,7 +1,7 @@
 // Préférences persistées dans <userData>/settings.json. Sans dépendance à Electron (testé dans test/).
 //
 // Écriture atomique (fichier temporaire puis renommage) avec une copie de secours : un arrêt brutal ne doit
-// jamais faire perdre la liste des comptes, donc leurs sessions. Lit aussi le format du POC (HP-message).
+// jamais faire perdre la liste des comptes, donc leurs sessions.
 
 const fs = require('node:fs');
 const path = require('node:path');
@@ -41,44 +41,29 @@ function normalizeAccount(raw) {
   return account;
 }
 
-// Format du POC : { activeId, doNotDisturb, muted[], extraAccounts[{id, service}], trayHintShown }.
-function fromPoc(raw, catalog) {
-  const muted = new Set(Array.isArray(raw.muted) ? raw.muted : []);
-  const extras = Array.isArray(raw.extraAccounts) ? raw.extraAccounts : [];
-  const accounts = catalog
-    .filter((service) => service.enabled !== false)
-    .flatMap((service) => [
-      { id: service.id, service: service.id },
-      ...extras.filter((extra) => extra?.service === service.id).map((extra) => ({ id: extra.id, service: service.id })),
-    ])
-    .map((account) => (muted.has(account.id) ? { ...account, muted: true } : account));
-  return { accounts, activeId: raw.activeId, dnd: raw.doNotDisturb === true, trayHintShown: raw.trayHintShown === true };
-}
-
 function normalize(raw, catalog) {
   const base = defaults(catalog);
   if (!isObject(raw)) return base;
-  const source = raw.version === undefined && ('extraAccounts' in raw || 'doNotDisturb' in raw) ? { ...raw, ...fromPoc(raw, catalog) } : raw;
   const settings = { ...base };
-  if (Array.isArray(source.accounts)) {
+  if (Array.isArray(raw.accounts)) {
     const ids = new Set();
-    settings.accounts = source.accounts
+    settings.accounts = raw.accounts
       .map(normalizeAccount)
       .filter((account) => account && !ids.has(account.id) && ids.add(account.id));
   }
-  if (typeof source.activeId === 'string') settings.activeId = source.activeId;
-  settings.dnd = source.dnd === true;
-  settings.dndUntil = settings.dnd && finite(source.dndUntil) ? source.dndUntil : null;
-  if (typeof source.closeToTray === 'boolean') settings.closeToTray = source.closeToTray;
-  if (isObject(source.window) && finite(source.window.width) && finite(source.window.height)) {
-    const { width, height, x, y, maximized } = source.window;
+  if (typeof raw.activeId === 'string') settings.activeId = raw.activeId;
+  settings.dnd = raw.dnd === true;
+  settings.dndUntil = settings.dnd && finite(raw.dndUntil) ? raw.dndUntil : null;
+  if (typeof raw.closeToTray === 'boolean') settings.closeToTray = raw.closeToTray;
+  if (isObject(raw.window) && finite(raw.window.width) && finite(raw.window.height)) {
+    const { width, height, x, y, maximized } = raw.window;
     settings.window = { width, height, maximized: maximized === true };
     if (finite(x) !== undefined && finite(y) !== undefined) Object.assign(settings.window, { x, y });
   }
-  settings.autostartInitialized = source.autostartInitialized === true;
-  settings.trayHintShown = source.trayHintShown === true;
-  if (Array.isArray(source.pendingPartitionDeletes)) {
-    settings.pendingPartitionDeletes = source.pendingPartitionDeletes.filter((id) => typeof id === 'string' && ID_PATTERN.test(id));
+  settings.autostartInitialized = raw.autostartInitialized === true;
+  settings.trayHintShown = raw.trayHintShown === true;
+  if (Array.isArray(raw.pendingPartitionDeletes)) {
+    settings.pendingPartitionDeletes = raw.pendingPartitionDeletes.filter((id) => typeof id === 'string' && ID_PATTERN.test(id));
   }
   return settings;
 }
@@ -160,4 +145,4 @@ class SettingsStore {
   }
 }
 
-module.exports = { SettingsStore, normalize, defaults, renameWithRetry, VERSION };
+module.exports = { SettingsStore, normalize, defaults, VERSION };

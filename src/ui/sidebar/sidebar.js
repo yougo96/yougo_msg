@@ -175,7 +175,7 @@ function render(next) {
 
   dndButton.classList.toggle('on', state.dnd.on);
   dndButton.setAttribute('aria-pressed', String(state.dnd.on));
-  dndButton.title = `Ne pas déranger : ${state.dnd.label.toLowerCase()}\nClic droit : choisir une durée`;
+  dndButton.title = `Ne pas déranger : ${state.dnd.label.toLowerCase()}`;
   // Version courte du libellé : « Activé » se voit déjà à l'état du bouton.
   dndState.textContent = state.dnd.label.replace(/^Activé j/, 'J');
   menuButton.classList.toggle('update', state.update.ready);
@@ -212,11 +212,13 @@ function renderPanel() {
 // Compte à rebours de la prochaine tentative.
 setInterval(() => state && !panel.hidden && renderPanel(), 1000);
 
-dndButton.addEventListener('click', () => window.hub.toggleDnd());
-dndButton.addEventListener('contextmenu', (event) => {
-  event.preventDefault();
-  window.hub.dndMenu();
-});
+// Un clic montre tout de suite les durées (et « Désactiver » quand c'est actif). Le clic droit fait pareil.
+for (const type of ['click', 'contextmenu']) {
+  dndButton.addEventListener(type, (event) => {
+    event.preventDefault();
+    window.hub.dndMenu();
+  });
+}
 menuButton.addEventListener('click', () => window.hub.appMenu());
 // Un fichier lâché sur la barre ne doit pas remplacer la page.
 for (const type of ['dragover', 'drop']) document.addEventListener(type, (event) => event.preventDefault());
