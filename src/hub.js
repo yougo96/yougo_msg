@@ -216,9 +216,10 @@ class Hub {
     for (const [id, view] of this.views) if (!this.shouldShow(id)) view.setVisible(false);
   }
 
+  // Pendant la fermeture, la page peut être déjà fermée (la vue n'a alors plus de webContents).
   focusActive() {
-    const view = this.views.get(this.prefs.activeId);
-    if (view && this.shouldShow(this.prefs.activeId) && !view.webContents.isDestroyed()) view.webContents.focus();
+    const wc = this.views.get(this.prefs.activeId)?.webContents;
+    if (wc && !wc.isDestroyed() && this.shouldShow(this.prefs.activeId)) wc.focus();
   }
 
   select(id) {
