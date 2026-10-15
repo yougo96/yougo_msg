@@ -23,6 +23,7 @@ test('réglages abîmés ou farfelus : normalisés sans planter', () => {
       accounts: [{ id: 'whatsapp', service: 'whatsapp', zoom: 99, name: '  Pro  ', sleep: true }, { id: 'whatsapp', service: 'whatsapp' }, { id: '../evil', service: 'x' }, 'n/a', { id: 'oldie', service: 'icq', sleep: 'oui' }],
       muted: 'oui',
       dnd: 'yes',
+      discreet: 'oui',
       window: { width: 'big' },
       pendingPartitionDeletes: ['ok-1', '..\\..\\Windows'],
     },
@@ -33,8 +34,14 @@ test('réglages abîmés ou farfelus : normalisés sans planter', () => {
     { id: 'oldie', service: 'icq' }, // messagerie retirée du catalogue : gardée, pas affichée
   ]);
   assert.equal(settings.dnd, false);
+  assert.equal(settings.discreet, false);
   assert.equal(settings.window, null);
   assert.deepEqual(settings.pendingPartitionDeletes, ['ok-1']);
+});
+
+test('mode discret : gardé d’un lancement à l’autre', () => {
+  assert.equal(defaults(CATALOG).discreet, false);
+  assert.equal(normalize({ discreet: true }, CATALOG).discreet, true);
 });
 
 test('enregistrement atomique, avec copie de secours relue si le fichier est abîmé', () => {

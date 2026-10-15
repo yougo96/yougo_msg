@@ -51,6 +51,7 @@ class AppTray {
           : [{ label: status, enabled: false }]),
         { type: 'separator' },
         { label: 'Ne pas déranger', submenu: hub.dndMenuItems() },
+        hub.discreetMenuItem(),
         { type: 'separator' },
         ...hub.settingsMenuItems(),
         { type: 'separator' },

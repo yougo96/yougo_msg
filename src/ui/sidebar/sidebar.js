@@ -124,6 +124,7 @@ function render(next) {
   state = next;
   document.documentElement.style.setProperty('--sidebar-width', `${state.sidebarWidth}px`);
   document.body.classList.toggle('compact', state.compact);
+  document.body.classList.toggle('discreet', state.discreet === true);
   const titlebar = document.getElementById('titlebar');
   if (titlebar) titlebar.textContent = state.accounts.find((account) => account.id === state.activeId)?.name ?? 'Yougo Msg';
   summaryText.textContent = summaryLine();

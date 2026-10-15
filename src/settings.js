@@ -17,6 +17,7 @@ function defaults(catalog) {
     activeId: null,
     dnd: false,
     dndUntil: null, // horodatage de fin, ou null = jusqu'à réactivation
+    discreet: false, // barre latérale masquée (Ctrl+Maj+B)
     closeToTray: true,
     window: null, // { width, height, x, y, maximized }
     autostartInitialized: false,
@@ -54,6 +55,7 @@ function normalize(raw, catalog) {
   if (typeof raw.activeId === 'string') settings.activeId = raw.activeId;
   settings.dnd = raw.dnd === true;
   settings.dndUntil = settings.dnd && finite(raw.dndUntil) ? raw.dndUntil : null;
+  settings.discreet = raw.discreet === true;
   if (typeof raw.closeToTray === 'boolean') settings.closeToTray = raw.closeToTray;
   if (isObject(raw.window) && finite(raw.window.width) && finite(raw.window.height)) {
     const { width, height, x, y, maximized } = raw.window;

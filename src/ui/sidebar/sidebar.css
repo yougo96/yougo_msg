@@ -488,6 +488,12 @@ button:focus-visible {
   box-shadow: 0 3px 0 var(--accent);
 }
 
+/* ---------------------------------------------------------------- mode discret (Ctrl+Maj+B) */
+
+.discreet #sidebar {
+  display: none;
+}
+
 /* ---------------------------------------------------------------- zone de droite (aucune page affichée) */
 
 #stage {

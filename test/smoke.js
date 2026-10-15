@@ -260,6 +260,23 @@ async function run() {
 
   if (OUT) fs.writeFileSync(path.join(OUT, 'sidebar.png'), (await hub.win.webContents.capturePage()).toPNG());
 
+  // Mode discret : Ctrl+Maj+B masque la barre latérale et la page prend toute la largeur ; une seconde fois, tout revient.
+  const shownX = hub.views.get(ids[3]).getBounds().x;
+  const sidebarShown = () => hub.win.webContents.executeJavaScript('getComputedStyle(document.getElementById("sidebar")).display !== "none"');
+  const pressDiscreet = () => hub.handleShortcut({ preventDefault() {} }, { type: 'keyDown', code: 'KeyB', control: true, shift: true });
+  pressDiscreet();
+  const discreet = await waitFor(async () => hub.views.get(ids[3]).getBounds().x === 0 && !(await sidebarShown()), 3000);
+  const discreetVisibility = await page(hub, ids[3], 'document.visibilityState');
+  if (OUT) fs.writeFileSync(path.join(OUT, 'discreet.png'), (await hub.win.webContents.capturePage()).toPNG());
+  pressDiscreet();
+  const restored = await waitFor(async () => hub.views.get(ids[3]).getBounds().x === shownX && (await sidebarShown()), 3000);
+  check('mode discret : barre masquée puis rendue (Ctrl+Maj+B)', shownX > 200 && discreet && discreetVisibility === 'visible' && restored && hub.prefs.discreet === false, {
+    avant: shownX,
+    discret: discreet,
+    visibilite: discreetVisibility,
+    apres: hub.views.get(ids[3]).getBounds().x,
+  });
+
   // Fenêtre étroite : la liste se replie en colonne d'icônes, et les pages suivent.
   const listX = hub.views.get(ids[3]).getBounds().x;
   hub.win.unmaximize();

@@ -15,6 +15,8 @@ const { TITLE_BAR_HEIGHT, titleBarOptions, pageQuery } = require('./titlebar');
 const SIDEBAR_WIDTH = 248;
 const SIDEBAR_COMPACT_WIDTH = 72;
 const COMPACT_BELOW = 1200;
+// Mode discret : la barre latérale disparaît, la page prend toute la largeur.
+const DISCREET_ACCELERATOR = 'Ctrl+Shift+B';
 const ASSETS = path.join(__dirname, '..', 'assets');
 const SIDEBAR_HTML = path.join(__dirname, 'ui', 'sidebar', 'index.html');
 const SIDEBAR_PRELOAD = path.join(__dirname, 'preload', 'sidebar.js');
@@ -183,6 +185,7 @@ class Hub {
   }
 
   sidebarWidth() {
+    if (this.prefs.discreet) return 0;
     const width = this.win && !this.win.isDestroyed() ? this.win.getContentSize()[0] : 0;
     return width && width < COMPACT_BELOW ? SIDEBAR_COMPACT_WIDTH : SIDEBAR_WIDTH;
   }
@@ -190,6 +193,20 @@ class Hub {
   setFullscreenAccount(id) {
     this.fullscreenId = id;
     this.layout();
+  }
+
+  // Les raccourcis Ctrl+1 … Ctrl+9 et Ctrl+Tab changent toujours de compte, barre masquée.
+  toggleDiscreet() {
+    this.prefs.discreet = !this.prefs.discreet;
+    this.save();
+    this.layout();
+    this.pushState();
+    this.tray?.update(true);
+  }
+
+  // Aussi dans le menu de la zone de notification : de quoi retrouver la barre sans le raccourci.
+  discreetMenuItem() {
+    return { label: 'Mode discret (barre latérale masquée)', type: 'checkbox', checked: this.prefs.discreet, accelerator: DISCREET_ACCELERATOR, click: () => this.toggleDiscreet() };
   }
 
   // ---------------------------------------------------------------- comptes et vues
@@ -491,6 +508,7 @@ class Hub {
     return {
       sidebarWidth: this.sidebarWidth(),
       compact: this.sidebarWidth() === SIDEBAR_COMPACT_WIDTH,
+      discreet: this.prefs.discreet,
       summary,
       platform: process.platform,
       activeId: this.prefs.activeId,
@@ -571,6 +589,7 @@ class Hub {
     return [
       { label: 'Ajouter une messagerie', submenu: this.addMenuItems() },
       { label: 'Ne pas déranger', submenu: this.dndMenuItems() },
+      this.discreetMenuItem(),
       { type: 'separator' },
       ...this.settingsMenuItems(),
       { type: 'separator' },
@@ -659,6 +678,8 @@ class Hub {
       if (account) this.select(account.id);
     } else if (input.code === 'Tab') {
       this.selectRelative(input.shift ? -1 : 1);
+    } else if (input.code === 'KeyB' && input.shift) {
+      if (!input.isAutoRepeat) this.toggleDiscreet();
     } else if (input.code === 'KeyR' && !input.shift) {
       live?.reload();
     } else if (input.code === 'KeyR' && input.shift) {
