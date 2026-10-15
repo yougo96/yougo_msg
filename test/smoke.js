@@ -260,17 +260,24 @@ async function run() {
 
   if (OUT) fs.writeFileSync(path.join(OUT, 'sidebar.png'), (await hub.win.webContents.capturePage()).toPNG());
 
-  // Mode discret : Ctrl+Maj+B masque la barre latérale et la page prend toute la largeur ; une seconde fois, tout revient.
+  // Mode discret : Ctrl+D masque la barre latérale et la page prend toute la largeur ; une seconde fois, tout revient.
   const shownX = hub.views.get(ids[3]).getBounds().x;
   const sidebarShown = () => hub.win.webContents.executeJavaScript('getComputedStyle(document.getElementById("sidebar")).display !== "none"');
-  const pressDiscreet = () => hub.handleShortcut({ preventDefault() {} }, { type: 'keyDown', code: 'KeyB', control: true, shift: true });
+  const pressDiscreet = (shift = false) => {
+    let taken = false;
+    hub.handleShortcut({ preventDefault: () => (taken = true) }, { type: 'keyDown', code: 'KeyD', control: true, shift });
+    return taken;
+  };
+  // Ctrl+Maj+D reste à la page (Discord : couper le son).
+  const leftToPage = !pressDiscreet(true) && hub.prefs.discreet === false;
   pressDiscreet();
   const discreet = await waitFor(async () => hub.views.get(ids[3]).getBounds().x === 0 && !(await sidebarShown()), 3000);
   const discreetVisibility = await page(hub, ids[3], 'document.visibilityState');
   if (OUT) fs.writeFileSync(path.join(OUT, 'discreet.png'), (await hub.win.webContents.capturePage()).toPNG());
   pressDiscreet();
   const restored = await waitFor(async () => hub.views.get(ids[3]).getBounds().x === shownX && (await sidebarShown()), 3000);
-  check('mode discret : barre masquée puis rendue (Ctrl+Maj+B)', shownX > 200 && discreet && discreetVisibility === 'visible' && restored && hub.prefs.discreet === false, {
+  check('mode discret : barre masquée puis rendue (Ctrl+D), Ctrl+Maj+D laissé à la page', leftToPage && shownX > 200 && discreet && discreetVisibility === 'visible' && restored && hub.prefs.discreet === false, {
+    ctrlMajD: leftToPage ? 'page' : 'pris',
     avant: shownX,
     discret: discreet,
     visibilite: discreetVisibility,

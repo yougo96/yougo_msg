@@ -51,7 +51,7 @@ Yougo Msg affiche leurs **versions web officielles**, dans une seule fenêtre. A
 - **Rien n'est marqué lu en cachette.** Une messagerie masquée ne voit rien.
 - **Des notifications claires.** « Messenger · Julien », et le clic ouvre la conversation.
 - **Du silence à la demande.** *Ne pas déranger* en bas de la barre.
-- **Un mode discret.** `Ctrl+Maj+B` cache la barre latérale, et la remet.
+- **Un mode discret.** `Ctrl+D` cache la barre latérale, et la remet.
 - **Elle se fait oublier.** Elle démarre avec le PC, vit près de l'horloge, se met à jour seule.
 - **Rien ne sort de la machine.** Pas de télémétrie. Le journal ne note jamais le texte des messages.
 
@@ -101,7 +101,7 @@ Se connecter à chaque messagerie. Les sessions sont gardées.
 | Réordonner | Glisser le compte |
 | Couper, renommer, recharger, retirer un compte | Clic droit dessus |
 | Faire taire tout le monde | *Ne pas déranger*, en bas, puis choisir la durée |
-| Cacher la barre latérale (mode discret) | `Ctrl+Maj+B`, ou menu ⋯. Pour la remettre : `Ctrl+Maj+B`, ou clic droit sur l'icône près de l'horloge |
+| Cacher la barre latérale (mode discret) | `Ctrl+D`, ou menu ⋯. Pour la remettre : `Ctrl+D`, ou clic droit sur l'icône près de l'horloge |
 | Ajouter une messagerie, voir le diagnostic | Menu ⋯ |
 | Quitter | Clic droit sur l'icône près de l'horloge → *Quitter* |
 
@@ -113,7 +113,7 @@ Fermer la fenêtre ne quitte pas. L'app continue de recevoir.
 | --- | --- |
 | `Ctrl+1` … `Ctrl+9` | Aller au compte 1 à 9 |
 | `Ctrl+Tab` / `Ctrl+Maj+Tab` | Compte suivant / précédent |
-| `Ctrl+Maj+B` | Mode discret : cacher ou afficher la barre latérale |
+| `Ctrl+D` | Mode discret : cacher ou afficher la barre latérale |
 | `Ctrl+R` ou `F5` | Recharger (`Ctrl+Maj+R` : sans le cache) |
 | `Ctrl+molette`, `Ctrl+=` / `Ctrl+)`, `Ctrl+0` | Zoom, retour à 100 % |
 | `Ctrl+Maj+I` ou `F12` | Outils de développement |

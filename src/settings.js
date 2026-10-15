@@ -17,7 +17,7 @@ function defaults(catalog) {
     activeId: null,
     dnd: false,
     dndUntil: null, // horodatage de fin, ou null = jusqu'à réactivation
-    discreet: false, // barre latérale masquée (Ctrl+Maj+B)
+    discreet: false, // barre latérale masquée (Ctrl+D)
     closeToTray: true,
     window: null, // { width, height, x, y, maximized }
     autostartInitialized: false,

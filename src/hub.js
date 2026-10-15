@@ -16,7 +16,7 @@ const SIDEBAR_WIDTH = 248;
 const SIDEBAR_COMPACT_WIDTH = 72;
 const COMPACT_BELOW = 1200;
 // Mode discret : la barre latérale disparaît, la page prend toute la largeur.
-const DISCREET_ACCELERATOR = 'Ctrl+Shift+B';
+const DISCREET_ACCELERATOR = 'Ctrl+D';
 const ASSETS = path.join(__dirname, '..', 'assets');
 const SIDEBAR_HTML = path.join(__dirname, 'ui', 'sidebar', 'index.html');
 const SIDEBAR_PRELOAD = path.join(__dirname, 'preload', 'sidebar.js');
@@ -678,7 +678,8 @@ class Hub {
       if (account) this.select(account.id);
     } else if (input.code === 'Tab') {
       this.selectRelative(input.shift ? -1 : 1);
-    } else if (input.code === 'KeyB' && input.shift) {
+    } else if (input.code === 'KeyD' && !input.shift) {
+      // Ctrl+Maj+D reste à la page (Discord : couper le son).
       if (!input.isAutoRepeat) this.toggleDiscreet();
     } else if (input.code === 'KeyR' && !input.shift) {
       live?.reload();
